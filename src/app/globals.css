@@ -6,6 +6,7 @@ body{
     @apply text-gray-800;
 }
 
+
 @keyframes marquee {
     0% {
       transform: translateX(100%);

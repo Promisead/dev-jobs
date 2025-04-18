@@ -62,7 +62,7 @@ const products: ProductType[] = [
 
 export default function Footer() {
   return (
-    <div className="bg-black z-20" id="first-section">
+    <div className="bg-black z-20 w-full  mt-20"  id="first-section">
       <div className="mx-auto max-w-2xl pt-40 pb-16 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         {/* Marquee Section */}
         <div className="overflow-hidden whitespace-nowrap">

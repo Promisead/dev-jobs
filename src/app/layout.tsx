@@ -23,27 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Header />
         {children}
-      {/*   <footer className="container py-8 text-gray-500">
-          <div>
-            <div className="mt-8">
-              <p>
-                Email:{" "}
-                <a href="mailto:info@dev-champions.tech" className="underline">
-                  info@dev-champions.tech
-                </a>
-              </p>
-              <p>
-                Phone:{" "}
-                <a href="tel:+2349115034504" className="underline">
-                  +234 9115 034 504
-                </a>
-              </p>
-            </div>
-          </div>
-          <span className="ml-3   font-semibold text-[#077998]">DC </span>
-          <span className="text-[#8A1D4F] font-semibold">Jobs</span>&copy; 2025
-          - All rights reserved
-        </footer> */}
+     
         <Footer />
       </body>
     </html>
