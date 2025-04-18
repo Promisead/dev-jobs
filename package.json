@@ -17,7 +17,7 @@
     "@fortawesome/react-fontawesome": "^0.2.1",
     "@radix-ui/themes": "^3.0.5",
     "@workos-inc/authkit-nextjs": "^0.5.3",
-    "@workos-inc/node": "^7.4.0",
+    "@workos-inc/node": "^7.46.0",
     "axios": "^1.6.8",
     "mongoose": "^8.4.0",
     "next": "14.2.3",
