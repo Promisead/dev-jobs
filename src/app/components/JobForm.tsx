@@ -96,8 +96,8 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
           <div>
             Salary
             <TextField.Root name="salary" defaultValue={jobDoc?.salary || ''}>
-              <TextField.Slot>$</TextField.Slot>
-              <TextField.Slot>k/year</TextField.Slot>
+              <TextField.Slot>₦</TextField.Slot>
+              <TextField.Slot>per month</TextField.Slot>
             </TextField.Root>
             {errors.salary && <p className="text-red-500 text-sm">{errors.salary}</p>}
           </div>
