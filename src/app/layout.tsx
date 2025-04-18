@@ -5,6 +5,7 @@ import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import Link from "next/link";
 import Footer from "./components/Footer";
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Header />
+        <Analytics />
         {children}
      
         <Footer />
