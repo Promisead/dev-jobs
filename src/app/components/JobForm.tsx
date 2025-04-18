@@ -15,21 +15,9 @@ import {
 } from "react-country-state-city";
 
 export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job }) {
-  // const [countryId, setCountryId] = useState<number>(jobDoc?.countryId ?? 0);
-  // const [stateId, setStateId] = useState<number>(jobDoc?.stateId ?? 0);
-  // const [cityId, setCityId] = useState<number>(jobDoc?.cityId ?? 0);
-  const [countryId, setCountryId] = useState<number>(
-    Number(jobDoc?.countryId ?? 0)
-  );
-  
-  const [stateId, setStateId] = useState<number>(
-    Number(jobDoc?.stateId ?? 0)
-  );
-  
-  const [cityId, setCityId] = useState<number>(
-    Number(jobDoc?.cityId ?? 0)
-  );
-  
+  const [countryId, setCountryId] = useState<number>(Number(jobDoc?.countryId ?? 0));
+  const [stateId, setStateId] = useState<number>(Number(jobDoc?.stateId ?? 0));
+  const [cityId, setCityId] = useState<number>(Number(jobDoc?.cityId ?? 0));
   const [countryName, setCountryName] = useState(jobDoc?.country || '');
   const [stateName, setStateName] = useState(jobDoc?.state || '');
   const [cityName, setCityName] = useState(jobDoc?.city || '');
@@ -89,7 +77,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <CountrySelect
               defaultValue={
                 countryId && countryName
-                  ? { id: Number(countryId), name: countryName }
+                  ? { id: countryId, name: countryName } as any // Ensure compatibility with expected type
                   : undefined
               }
               onChange={(e: any) => {
@@ -101,10 +89,10 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <StateSelect
               defaultValue={
                 stateId && stateName
-                  ? { id: Number(stateId), name: stateName }
+                  ? { id: stateId, name: stateName } as any // Ensure compatibility with expected type
                   : undefined
               }
-              countryid={Number(countryId)}
+              countryid={countryId}
               onChange={(e: any) => {
                 setStateId(e.id);
                 setStateName(e.name);
@@ -114,11 +102,11 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <CitySelect
               defaultValue={
                 cityId && cityName
-                  ? { id: Number(cityId), name: cityName }
+                  ? { id: cityId, name: cityName } as any // Ensure compatibility with expected type
                   : undefined
               }
-              countryid={Number(countryId)}
-              stateid={Number(stateId)}
+              countryid={countryId}
+              stateid={stateId}
               onChange={(e: any) => {
                 setCityId(e.id);
                 setCityName(e.name);
