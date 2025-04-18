@@ -13,7 +13,7 @@ export default async function Header() {
      <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center">
                   <Image
-                    src="/logo/logo_web.png"
+                    src="/images/logo/logo_web.png"
                     alt="Logo"
                     width={30} // Adjust width as needed for responsive sizing
                     height={30}

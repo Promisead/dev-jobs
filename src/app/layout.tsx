@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import Link from "next/link";
+import Footer from "./components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Header />
         {children}
-        <footer className="container py-8 text-gray-500">
+      {/*   <footer className="container py-8 text-gray-500">
           <div>
             <div className="mt-8">
               <p>
@@ -42,7 +43,8 @@ export default function RootLayout({
           <span className="ml-3   font-semibold text-[#077998]">DC </span>
           <span className="text-[#8A1D4F] font-semibold">Jobs</span>&copy; 2025
           - All rights reserved
-        </footer>
+        </footer> */}
+        <Footer />
       </body>
     </html>
   );
