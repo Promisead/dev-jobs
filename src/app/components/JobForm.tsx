@@ -22,7 +22,28 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
   const [stateName, setStateName] = useState(jobDoc?.state || '');
   const [cityName, setCityName] = useState(jobDoc?.city || '');
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   async function handleSaveJob(data: FormData) {
+    // Validate inputs
+    const newErrors: Record<string, string> = {};
+    if (!data.get('title')) newErrors.title = 'Job title is required.';
+    if (!data.get('description')) newErrors.description = 'Job description is required.';
+    if (!data.get('salary')) newErrors.salary = 'Salary is required.';
+    if (!countryName) newErrors.country = 'Country is required.';
+    if (!stateName) newErrors.state = 'State is required.';
+    if (!cityName) newErrors.city = 'City is required.';
+    if (!data.get('contactName')) newErrors.contactName = 'Contact name is required.';
+    if (!data.get('contactPhone')) newErrors.contactPhone = 'Contact phone is required.';
+    if (!data.get('contactEmail')) newErrors.contactEmail = 'Contact email is required.';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return; // Stop form submission
+    }
+
+    // Clear errors and proceed
+    setErrors({});
     data.set('country', countryName);
     data.set('state', stateName);
     data.set('city', cityName);
@@ -36,14 +57,24 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
 
   return (
     <Theme>
-      <form action={handleSaveJob} className="container mt-6 flex flex-col gap-4">
+      <form
+  onSubmit={(e) => {
+    e.preventDefault(); // Prevent the default form submission
+    const formData = new FormData(e.target as HTMLFormElement); // Access the form element
+    handleSaveJob(formData); // Call your save function
+  }}
+  className="container mt-6 flex flex-col gap-4"
+>
         {jobDoc && <input type="hidden" name="id" value={jobDoc._id} />}
 
-        <TextField.Root
-          name="title"
-          placeholder="Job title"
-          defaultValue={jobDoc?.title || ''}
-        />
+        <div>
+          <TextField.Root
+            name="title"
+             placeholder="Job title"
+            defaultValue={jobDoc?.title || ''}
+          />
+          {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+        </div>
 
         <div className="grid sm:grid-cols-3 gap-6 *:grow">
           <div>
@@ -68,6 +99,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               <TextField.Slot>$</TextField.Slot>
               <TextField.Slot>k/year</TextField.Slot>
             </TextField.Root>
+            {errors.salary && <p className="text-red-500 text-sm">{errors.salary}</p>}
           </div>
         </div>
 
@@ -77,7 +109,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <CountrySelect
               defaultValue={
                 countryId && countryName
-                  ? { id: countryId, name: countryName } as any // Ensure compatibility with expected type
+                  ? { id: countryId, name: countryName } as any
                   : undefined
               }
               onChange={(e: any) => {
@@ -86,10 +118,11 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select Country"
             />
+            {errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
             <StateSelect
               defaultValue={
                 stateId && stateName
-                  ? { id: stateId, name: stateName } as any // Ensure compatibility with expected type
+                  ? { id: stateId, name: stateName } as any
                   : undefined
               }
               countryid={countryId}
@@ -99,10 +132,11 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select State"
             />
+            {errors.state && <p className="text-red-500 text-sm">{errors.state}</p>}
             <CitySelect
               defaultValue={
                 cityId && cityName
-                  ? { id: cityId, name: cityName } as any // Ensure compatibility with expected type
+                  ? { id: cityId, name: cityName } as any
                   : undefined
               }
               countryid={countryId}
@@ -113,7 +147,18 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select City"
             />
+            {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
           </div>
+        </div>
+
+        <div>
+          <TextArea
+            defaultValue={jobDoc?.description || ''}
+            placeholder="Job description"
+            resize="vertical"
+            name="description"
+          />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
         </div>
 
         <div className="sm:flex">
@@ -138,42 +183,26 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
                   placeholder="John Doe"
                   name="contactName"
                   defaultValue={jobDoc?.contactName || ''}
-                >
-                  <TextField.Slot>
-                    <FontAwesomeIcon icon={faUser} />
-                  </TextField.Slot>
-                </TextField.Root>
+                />
+                {errors.contactName && <p className="text-red-500 text-sm">{errors.contactName}</p>}
                 <TextField.Root
                   placeholder="Phone"
                   type="tel"
                   name="contactPhone"
                   defaultValue={jobDoc?.contactPhone || ''}
-                >
-                  <TextField.Slot>
-                    <FontAwesomeIcon icon={faPhone} />
-                  </TextField.Slot>
-                </TextField.Root>
+                />
+                {errors.contactPhone && <p className="text-red-500 text-sm">{errors.contactPhone}</p>}
                 <TextField.Root
                   placeholder="Email"
                   type="email"
                   name="contactEmail"
                   defaultValue={jobDoc?.contactEmail || ''}
-                >
-                  <TextField.Slot>
-                    <FontAwesomeIcon icon={faEnvelope} />
-                  </TextField.Slot>
-                </TextField.Root>
+                />
+                {errors.contactEmail && <p className="text-red-500 text-sm">{errors.contactEmail}</p>}
               </div>
             </div>
           </div>
         </div>
-
-        <TextArea
-          defaultValue={jobDoc?.description || ''}
-          placeholder="Job description"
-          resize="vertical"
-          name="description"
-        />
 
         <div className="flex justify-center">
           <Button size="3">
