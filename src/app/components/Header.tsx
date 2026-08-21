@@ -1,3 +1,5 @@
+import PendingSubmitButton from "@/app/components/PendingSubmitButton";
+
 import { getSignInUrl, getUser, signOut } from "@workos-inc/authkit-nextjs";
 
 import Image from "next/image";
@@ -26,6 +28,7 @@ const ecosystemLinks = [
 
 export default async function Header() {
   const { user } = await getUser();
+
   const signInUrl = await getSignInUrl();
 
   return (
@@ -35,7 +38,7 @@ export default async function Header() {
         <Link
           href="/"
           className="flex shrink-0 items-center gap-3"
-          aria-label="DC Jobs home"
+          aria-label="Jobs home"
         >
           <Image
             src="/images/logo/logo_web.png"
@@ -49,7 +52,7 @@ export default async function Header() {
 
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold tracking-tight text-[#077998] sm:text-3xl">
-              ChampHire
+              DC
             </span>
 
             <span className="text-2xl font-bold tracking-tight text-[#8A1D4F] sm:text-3xl">
@@ -58,7 +61,7 @@ export default async function Header() {
           </div>
         </Link>
 
-        {/* DESKTOP ECOSYSTEM NAVIGATION */}
+        {/* DESKTOP ECOSYSTEM */}
         <nav
           className="hidden items-center gap-7 lg:flex"
           aria-label="Dev Champions ecosystem"
@@ -70,14 +73,14 @@ export default async function Header() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={item.ariaLabel}
-              className="relative text-sm font-semibold text-gray-600 transition-colors duration-200 hover:text-[#077998]"
+              className="text-sm font-semibold text-gray-600 transition hover:text-[#077998]"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        {/* AUTH + CTA */}
+        {/* ACCOUNT ACTIONS */}
         <nav
           className="flex items-center gap-2 sm:gap-3"
           aria-label="Account actions"
@@ -93,29 +96,30 @@ export default async function Header() {
             <form
               action={async () => {
                 "use server";
+
                 await signOut();
               }}
             >
-              <button
-                type="submit"
+              <PendingSubmitButton
+                idleText="Logout"
+                pendingText="Signing out..."
                 className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 sm:px-4"
-              >
-                Logout
-              </button>
+              />
             </form>
           )}
 
           <Link
             href="/new-listing"
-            className="rounded-lg bg-[#077998] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#066982] sm:px-5"
+            className="rounded-lg bg-[#077998] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#066982] sm:px-5"
           >
             <span className="hidden sm:inline">Post a Job</span>
+
             <span className="sm:hidden">Post Job</span>
           </Link>
         </nav>
       </div>
 
-      {/* MOBILE ECOSYSTEM NAVIGATION */}
+      {/* MOBILE ECOSYSTEM */}
       <div className="border-t border-gray-100 bg-white lg:hidden">
         <nav
           className="mx-auto flex max-w-7xl items-center gap-6 overflow-x-auto px-4 py-3 sm:px-6"

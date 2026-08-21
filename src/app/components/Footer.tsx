@@ -155,7 +155,7 @@ export default function Footer() {
             <Link
               href="/"
               className="inline-flex items-center gap-3"
-              aria-label="ChampHire Jobs home"
+              aria-label="DC Jobs home"
             >
               <Image
                 src="/images/logo/logo_web_white.png"
@@ -167,7 +167,7 @@ export default function Footer() {
               />
 
               <span className="text-2xl font-semibold tracking-tight text-white">
-                ChampHire
+                DC
               </span>
             </Link>
 

@@ -1,26 +1,10 @@
-// export default async function Hero() {
-//   return (
-//     <section className="container my-16">
-//       <h1 className="text-4xl font-bold text-center">
-//         Find your next<br />dream job
-//       </h1>
-//       {/*<p className="text-center text-gray-600 mt-2">*/}
-//       {/*  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto, obcaecati quas! Aliquam at, dignissimos eius esse ex excepturi ipsa.*/}
-//       {/*</p>*/}
-//       <form className="flex gap-2 mt-4 max-w-md mx-auto">
-//         <input
-//           type="search"
-//           className="border border-gray-400 w-full py-2 px-3 rounded-md"
-//           placeholder="Search phrase.." />
-//         <button className="bg-blue-600 text-white py-2 px-4 rounded-md">
-//           Search
-//         </button>
-//       </form>
-//     </section>
-//   );
-// }
+"use client";
 
-import Link from "next/link";
+import InlineLoader from "@/app/components/InlineLoader";
+
+import { FormEvent, useRef, useState, useTransition } from "react";
+
+import { useRouter } from "next/navigation";
 
 type SearchFilters = {
   q: string;
@@ -38,7 +22,22 @@ type HeroProps = {
   total: number;
 };
 
+type PendingAction = "search" | "filters" | "clear" | null;
+
 export default function Hero({ filters, countries, total }: HeroProps) {
+  const router = useRouter();
+
+  const [isPending, startTransition] = useTransition();
+
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  /*
+   * We keep a ref as well as state because
+   * button click + form submit can happen
+   * during the same React update cycle.
+   */
+  const pendingActionRef = useRef<PendingAction>(null);
+
   const hasAdvancedFilters = Boolean(
     filters.remote ||
     filters.type ||
@@ -48,13 +47,107 @@ export default function Hero({ filters, countries, total }: HeroProps) {
     filters.sort !== "newest",
   );
 
+  function setAction(action: PendingAction) {
+    pendingActionRef.current = action;
+
+    setPendingAction(action);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isPending) {
+      return;
+    }
+
+    /*
+     * If the user presses Enter inside
+     * the search field instead of clicking
+     * a button, treat it as a search.
+     */
+    if (pendingActionRef.current === null) {
+      setAction("search");
+    }
+
+    const form = event.currentTarget;
+
+    const formData = new FormData(form);
+
+    const params = new URLSearchParams();
+
+    /*
+     * IMPORTANT:
+     * Use FormData.forEach rather than
+     * `for...of formData.entries()`.
+     *
+     * This avoids the downlevelIteration
+     * TypeScript build error in this project.
+     */
+    formData.forEach((rawValue, key) => {
+      if (typeof rawValue !== "string") {
+        return;
+      }
+
+      const value = rawValue.trim();
+
+      if (!value) {
+        return;
+      }
+
+      /*
+       * Do not put the default sorting
+       * option into the URL.
+       *
+       * This keeps:
+       *
+       * /
+       *
+       * instead of:
+       *
+       * /?sort=newest
+       */
+      if (key === "sort" && value === "newest") {
+        return;
+      }
+
+      params.set(key, value);
+    });
+
+    /*
+     * Pagination always returns to
+     * page 1 when doing a new search
+     * or applying different filters.
+     */
+    params.delete("page");
+
+    const query = params.toString();
+
+    const destination = query ? `/?${query}` : "/";
+
+    startTransition(() => {
+      router.push(destination);
+    });
+  }
+
+  function handleClearFilters() {
+    if (isPending) {
+      return;
+    }
+
+    setAction("clear");
+
+    startTransition(() => {
+      router.push("/");
+    });
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        {/* Hero heading */}
+        {/* HERO HEADING */}
         <div className="text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#077998]">
-            Dev Champions Jobs
+            Career Opportunities
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
@@ -67,7 +160,8 @@ export default function Hero({ filters, countries, total }: HeroProps) {
           </p>
         </div>
 
-        <form action="/" method="GET" className="mt-8">
+        {/* SEARCH + FILTER FORM */}
+        <form onSubmit={handleSubmit} className="mt-8">
           {/* MAIN SEARCH */}
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative grow">
@@ -91,25 +185,33 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                 type="search"
                 defaultValue={filters.q}
                 placeholder="Job title, company, skill, location..."
-                className="h-14 w-full rounded-xl border border-gray-300 bg-white py-3 pl-12 pr-4 text-base outline-none transition placeholder:text-gray-400 focus:border-[#077998] focus:ring-2 focus:ring-[#077998]/10"
+                disabled={isPending}
+                className="h-14 w-full rounded-xl border border-gray-300 bg-white py-3 pl-12 pr-4 text-base outline-none transition placeholder:text-gray-400 focus:border-[#077998] focus:ring-2 focus:ring-[#077998]/10 disabled:cursor-wait disabled:bg-gray-50"
               />
             </div>
 
             <button
               type="submit"
-              className="h-14 rounded-xl bg-[#077998] px-7 font-semibold text-white shadow-sm transition hover:bg-[#066982]"
+              disabled={isPending}
+              onClick={() => setAction("search")}
+              aria-busy={isPending && pendingAction === "search"}
+              className="inline-flex h-14 min-w-[150px] items-center justify-center gap-2 rounded-xl bg-[#077998] px-7 font-semibold text-white shadow-sm transition hover:bg-[#066982] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Search Jobs
+              {isPending && pendingAction === "search" && <InlineLoader />}
+
+              {isPending && pendingAction === "search"
+                ? "Searching..."
+                : "Search Jobs"}
             </button>
           </div>
 
-          {/* PROFESSIONAL FILTERS */}
+          {/* FILTER AREA */}
           <details
             open={hasAdvancedFilters}
             className="mt-4 rounded-xl border border-gray-200 bg-gray-50"
           >
             <summary className="cursor-pointer select-none px-5 py-4 text-sm font-semibold text-gray-700">
-              Filters & sorting
+              Filters &amp; sorting
             </summary>
 
             <div className="border-t border-gray-200 px-5 py-5">
@@ -122,8 +224,9 @@ export default function Hero({ filters, countries, total }: HeroProps) {
 
                   <select
                     name="remote"
+                    disabled={isPending}
                     defaultValue={filters.remote}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   >
                     <option value="">Any work mode</option>
 
@@ -143,8 +246,9 @@ export default function Hero({ filters, countries, total }: HeroProps) {
 
                   <select
                     name="type"
+                    disabled={isPending}
                     defaultValue={filters.type}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   >
                     <option value="">Any type</option>
 
@@ -164,8 +268,9 @@ export default function Hero({ filters, countries, total }: HeroProps) {
 
                   <select
                     name="country"
+                    disabled={isPending}
                     defaultValue={filters.country}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   >
                     <option value="">All countries</option>
 
@@ -187,9 +292,10 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                     name="minSalary"
                     type="number"
                     min="0"
+                    disabled={isPending}
                     defaultValue={filters.minSalary}
                     placeholder="e.g. 300"
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   />
                 </label>
 
@@ -203,9 +309,10 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                     name="maxSalary"
                     type="number"
                     min="0"
+                    disabled={isPending}
                     defaultValue={filters.maxSalary}
                     placeholder="e.g. 1000"
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   />
                 </label>
 
@@ -217,8 +324,9 @@ export default function Hero({ filters, countries, total }: HeroProps) {
 
                   <select
                     name="sort"
+                    disabled={isPending}
                     defaultValue={filters.sort}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998]"
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-[#077998] disabled:cursor-wait disabled:bg-gray-100"
                   >
                     <option value="newest">Newest first</option>
 
@@ -231,29 +339,43 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                 </label>
               </div>
 
+              {/* FILTER FOOTER */}
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-gray-500">
                   {total === 1 ? "1 job available" : `${total} jobs available`}
                 </p>
 
-                <div className="flex gap-3">
-                  {/* <Link
-                    href="/"
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+                <div className="flex flex-wrap gap-3">
+                  {/* CLEAR FILTERS */}
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleClearFilters}
+                    aria-busy={isPending && pendingAction === "clear"}
+                    className="inline-flex min-w-[125px] items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Clear filters
-                  </Link> */}
-                  <a
-                    href="/"
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-100"
-                  >
-                    Clear filters
-                  </a>
+                    {isPending && pendingAction === "clear" && <InlineLoader />}
+
+                    {isPending && pendingAction === "clear"
+                      ? "Clearing..."
+                      : "Clear filters"}
+                  </button>
+
+                  {/* APPLY FILTERS */}
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#077998] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066982]"
+                    disabled={isPending}
+                    onClick={() => setAction("filters")}
+                    aria-busy={isPending && pendingAction === "filters"}
+                    className="inline-flex min-w-[130px] items-center justify-center gap-2 rounded-lg bg-[#077998] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#066982] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Apply filters
+                    {isPending && pendingAction === "filters" && (
+                      <InlineLoader />
+                    )}
+
+                    {isPending && pendingAction === "filters"
+                      ? "Applying..."
+                      : "Apply filters"}
                   </button>
                 </div>
               </div>

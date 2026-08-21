@@ -1,17 +1,7 @@
-// 'use client';
-// import ReactTimeAgo from 'react-timeago';
-
-// export default function TimeAgo({createdAt}:{createdAt:string}) {
-//   return (
-//     <>
-//       <ReactTimeAgo date={createdAt}/>
-//     </>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
+
 import ReactTimeAgo from "react-timeago";
 
 export default function TimeAgo({ createdAt }: { createdAt: string }) {
@@ -21,16 +11,8 @@ export default function TimeAgo({ createdAt }: { createdAt: string }) {
     setMounted(true);
   }, []);
 
-  /*
-   * Important:
-   * Server render -> null
-   * First client render -> null
-   *
-   * This guarantees both HTML trees match.
-   * Relative time is rendered only after hydration.
-   */
   if (!mounted) {
-    return null;
+    return <span className="inline-block h-4 w-16" aria-hidden="true" />;
   }
 
   return <ReactTimeAgo date={createdAt} />;

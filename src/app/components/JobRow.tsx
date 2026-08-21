@@ -1,104 +1,29 @@
-// "use client";
-// import TimeAgo from "@/app/components/TimeAgo";
-// import { Job, JobModel } from "@/models/Job";
-// import { faHeart } from "@fortawesome/free-solid-svg-icons";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import axios from "axios";
-// import Link from "next/link";
-
-// export default function JobRow({ jobDoc }: { jobDoc: Job }) {
-//   return (
-//     <>
-//       <div className="bg-white p-4 rounded-lg shadow-sm relative">
-//         <div className="absolute cursor-pointer top-4 right-4">
-//           <FontAwesomeIcon className="size-4 text-gray-300" icon={faHeart} />
-//         </div>
-//         <div className="flex grow gap-4">
-//           <div className="content-center w-12 basis-12 shrink-0">
-//             <div className="relative size-12 rounded-md bg-gray-100 overflow-hidden">
-//               <div className="absolute inset-0 flex items-center justify-center text-xl">
-//                 💼
-//               </div>
-
-//               {jobDoc?.jobIcon && (
-//                 <img
-//                   className="relative z-10 size-12 object-contain bg-white"
-//                   src={jobDoc.jobIcon}
-//                   alt={`${jobDoc.orgName || "Company"} logo`}
-//                   onError={(event) => {
-//                     event.currentTarget.style.display = "none";
-//                   }}
-//                 />
-//               )}
-//             </div>
-//           </div>
-//           <div className="grow sm:flex">
-//             <div className="grow">
-//               <div>
-//                 <Link
-//                   href={`/jobs/${jobDoc.orgId}`}
-//                   className="hover:underline text-gray-500 text-sm"
-//                 >
-//                   {jobDoc.orgName || "?"}
-//                 </Link>
-//               </div>
-//               <div className="font-bold text-lg mb-1">
-//                 <Link className="hover:underline" href={"/show/" + jobDoc._id}>
-//                   {jobDoc.title}
-//                 </Link>
-//               </div>
-//               <div className="text-gray-400 text-sm capitalize">
-//                 {jobDoc.remote} &middot; {jobDoc.city}, {jobDoc.country}{" "}
-//                 &middot; {jobDoc.type}-time
-//                 {jobDoc.isAdmin && (
-//                   <>
-//                     {" "}
-//                     &middot; <Link href={"/jobs/edit/" + jobDoc._id}>
-//                       Edit
-//                     </Link>{" "}
-//                     &middot;{" "}
-//                     <button
-//                       type="button"
-//                       onClick={async () => {
-//                         await axios.delete("/api/jobs?id=" + jobDoc._id);
-//                         window.location.reload();
-//                       }}
-//                     >
-//                       Delete
-//                     </button>
-//                   </>
-//                 )}
-//               </div>
-//             </div>
-//             {jobDoc.createdAt && (
-//               <div className="content-end text-gray-500 text-sm">
-//                 <TimeAgo createdAt={jobDoc.createdAt} />
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
 "use client";
 
+import InlineLoader from "@/app/components/InlineLoader";
 import TimeAgo from "@/app/components/TimeAgo";
 import { Job } from "@/models/Job";
 
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function JobRow({ jobDoc }: { jobDoc: Job }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const hasCloudinaryImage =
     Boolean(jobDoc?.jobIcon) && jobDoc.jobIcon.includes("res.cloudinary.com");
 
   async function handleDeleteJob() {
+    if (isDeleting) {
+      return;
+    }
+
     const confirmed = window.confirm(
       `Are you sure you want to delete "${jobDoc.title}"?`,
     );
@@ -107,6 +32,8 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
       return;
     }
 
+    setIsDeleting(true);
+
     try {
       await axios.delete(`/api/jobs?id=${jobDoc._id}`);
 
@@ -114,13 +41,15 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
     } catch (error) {
       console.error("Failed to delete job:", error);
 
+      setIsDeleting(false);
+
       alert("Unable to delete this job. Please try again.");
     }
   }
 
   return (
     <article className="relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition duration-200 hover:border-gray-300 hover:shadow-md">
-      {/* SAVE / HEART */}
+      {/* SAVE ICON */}
       <button
         type="button"
         aria-label={`Save ${jobDoc.title}`}
@@ -133,7 +62,6 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
         {/* COMPANY LOGO */}
         <div className="w-12 shrink-0">
           <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
-            {/* FALLBACK ICON */}
             <span
               aria-hidden="true"
               className="absolute inset-0 flex items-center justify-center text-xl"
@@ -141,7 +69,6 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
               💼
             </span>
 
-            {/* CLOUDINARY IMAGE */}
             {hasCloudinaryImage && (
               <Image
                 src={jobDoc.jobIcon}
@@ -157,7 +84,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
           </div>
         </div>
 
-        {/* JOB INFORMATION */}
+        {/* JOB CONTENT */}
         <div className="min-w-0 grow sm:flex sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0 grow">
             {/* COMPANY */}
@@ -170,7 +97,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
               </Link>
             </div>
 
-            {/* JOB TITLE */}
+            {/* TITLE */}
             <h2 className="mb-2 pr-2 text-lg font-bold leading-snug text-gray-900">
               <Link
                 href={`/show/${jobDoc._id}`}
@@ -180,13 +107,11 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
               </Link>
             </h2>
 
-            {/* JOB META */}
+            {/* META */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
               {jobDoc.remote && (
                 <>
-                  <span className="capitalize">
-                    {formatRemote(jobDoc.remote)}
-                  </span>
+                  <span>{formatRemote(jobDoc.remote)}</span>
 
                   <span aria-hidden="true" className="text-gray-300">
                     •
@@ -194,7 +119,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
                 </>
               )}
 
-              {(jobDoc.city || jobDoc.country) && (
+              {(jobDoc.city || jobDoc.state || jobDoc.country) && (
                 <>
                   <span>
                     {[jobDoc.city, jobDoc.state, jobDoc.country]
@@ -223,10 +148,14 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
 
                 <button
                   type="button"
+                  disabled={isDeleting}
                   onClick={handleDeleteJob}
-                  className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 font-medium text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                  aria-busy={isDeleting}
+                  className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 font-medium text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Delete
+                  {isDeleting && <InlineLoader />}
+
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             )}
