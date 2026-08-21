@@ -8,19 +8,19 @@ type FooterLink = {
 
 const ecosystemLinks: FooterLink[] = [
   {
-    name: "Dev Champions Digital Solutions",
+    name: "Our Digital Solutions",
     href: "https://www.dev-champions.tech",
   },
   {
-    name: "Browse Technology Jobs",
+    name: "Browse Jobs",
     href: "/",
   },
   {
-    name: "Tech Career & Industry Insights",
+    name: "Tech  Insights",
     href: "https://path.dev-champions.tech",
   },
   {
-    name: "Developer Tutorials & Learning",
+    name: "Tech Learning",
     href: "https://core.dev-champions.tech",
   },
 ];
