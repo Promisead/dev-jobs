@@ -35,25 +35,15 @@ import {
   authkitMiddleware,
 } from "@workos-inc/authkit-nextjs";
 
-const redirectUri =
-  (
-    process.env.WORKOS_REDIRECT_URI ||
-    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ||
-    ""
-  ).trim();
-
-if (!redirectUri) {
-  throw new Error(
-    "WORKOS_REDIRECT_URI is not configured."
-  );
-}
-
-export default authkitMiddleware({
-  redirectUri,
-});
+export default authkitMiddleware();
 
 export const config = {
   matcher: [
+    /*
+     * Run AuthKit on application routes
+     * while excluding Next.js internals
+     * and static image assets.
+     */
     "/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
