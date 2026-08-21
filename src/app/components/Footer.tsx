@@ -149,7 +149,7 @@ export default function Footer() {
         </div>
 
         {/* FOOTER COLUMNS */}
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-8 md:ml-2 lg:ml-2">
           {/* BRAND */}
           <div className="sm:col-span-2 lg:col-span-2">
             <Link
@@ -160,14 +160,14 @@ export default function Footer() {
               <Image
                 src="/images/logo/logo_web_white.png"
                 alt="Dev Champions logo"
-                width={64}
-                height={64}
-                className="h-16 w-16 object-contain"
+                width={52}
+                height={52}
+                className="h-11 w-11 object-contain sm:h-12 sm:w-12 md:ml-2 lg:ml-2"
                 unoptimized
               />
 
               <span className="text-2xl font-semibold tracking-tight text-white">
-                DC
+                D•C Jobs
               </span>
             </Link>
 

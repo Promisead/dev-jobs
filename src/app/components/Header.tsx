@@ -52,7 +52,7 @@ export default async function Header() {
 
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold tracking-tight text-[#077998] sm:text-3xl">
-              DC
+              D•C
             </span>
 
             <span className="text-2xl font-bold tracking-tight text-[#8A1D4F] sm:text-3xl">

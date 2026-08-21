@@ -9,15 +9,83 @@ import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import axios from "axios";
+
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+
+import { useRef, useState } from "react";
 
 export default function JobRow({ jobDoc }: { jobDoc: Job }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isLiking, setIsLiking] = useState(false);
+
+  const [isLiked, setIsLiked] = useState(Boolean(jobDoc.isLiked));
+
+  const [likesCount, setLikesCount] = useState(jobDoc.likesCount ?? 0);
+
+  const [likeMessage, setLikeMessage] = useState("");
+
+  const likeMessageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const hasCloudinaryImage =
     Boolean(jobDoc?.jobIcon) && jobDoc.jobIcon.includes("res.cloudinary.com");
+
+  async function handleLikeJob() {
+    if (isLiking) {
+      return;
+    }
+
+    setIsLiking(true);
+
+    try {
+      const response = await axios.post(`/api/jobs/${jobDoc._id}/like`);
+
+      const liked = Boolean(response.data.liked);
+
+      const newLikesCount = Number(response.data.likesCount ?? 0);
+
+      setIsLiked(liked);
+
+      setLikesCount(newLikesCount);
+
+      setLikeMessage(liked ? "You liked this post." : "Like removed.");
+
+      /*
+       * This button is prepared for
+       * future Google Analytics / GTM
+       * click tracking through the
+       * data-ga-* attributes below.
+       *
+       * No GA event is sent yet.
+       */
+      if (likeMessageTimer.current) {
+        clearTimeout(likeMessageTimer.current);
+      }
+
+      likeMessageTimer.current = setTimeout(() => {
+        setLikeMessage("");
+      }, 2500);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setLikeMessage("Sign in to like this post.");
+      } else {
+        console.error("Failed to like job:", error);
+
+        setLikeMessage("Unable to update your like.");
+      }
+
+      if (likeMessageTimer.current) {
+        clearTimeout(likeMessageTimer.current);
+      }
+
+      likeMessageTimer.current = setTimeout(() => {
+        setLikeMessage("");
+      }, 3000);
+    } finally {
+      setIsLiking(false);
+    }
+  }
 
   async function handleDeleteJob() {
     if (isDeleting) {
@@ -49,16 +117,67 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
 
   return (
     <article className="relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition duration-200 hover:border-gray-300 hover:shadow-md">
-      {/* SAVE ICON */}
-      <button
-        type="button"
-        aria-label={`Save ${jobDoc.title}`}
-        className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-gray-300 transition hover:bg-gray-50 hover:text-[#8A1D4F]"
-      >
-        <FontAwesomeIcon icon={faHeart} className="h-4 w-4" />
-      </button>
+      {/* LIKE AREA */}
+      <div className="absolute right-4 top-3 flex flex-col items-end">
+        <button
+          type="button"
+          onClick={handleLikeJob}
+          disabled={isLiking}
+          aria-busy={isLiking}
+          aria-pressed={isLiked}
+          aria-label={
+            isLiked ? `Unlike ${jobDoc.title}` : `Like ${jobDoc.title}`
+          }
+          /*
+           * Ready for future GA/GTM.
+           *
+           * Later we can listen for:
+           * data-ga-event="job_like_click"
+           */
+          data-ga-event="job_like_click"
+          data-ga-job-id={jobDoc._id}
+          data-ga-job-title={jobDoc.title}
+          data-ga-company={jobDoc.orgName || ""}
+          data-ga-action={isLiked ? "unlike" : "like"}
+          className="group inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-sm transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
+        >
+          {isLiking ? (
+            <InlineLoader className="text-gray-400" />
+          ) : (
+            <FontAwesomeIcon
+              icon={faHeart}
+              className={`h-4 w-4 transition ${
+                isLiked
+                  ? "text-red-500"
+                  : "text-gray-300 group-hover:text-red-400"
+              }`}
+            />
+          )}
 
-      <div className="flex gap-4 pr-10">
+          <span
+            className={`min-w-[12px] text-xs font-semibold ${
+              isLiked ? "text-red-500" : "text-gray-400"
+            }`}
+          >
+            {likesCount}
+          </span>
+        </button>
+
+        {/* LIKE FEEDBACK */}
+        {likeMessage && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`mt-1 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium shadow-sm ${
+              isLiked ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {likeMessage}
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-4 pr-24">
         {/* COMPANY LOGO */}
         <div className="w-12 shrink-0">
           <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
@@ -197,11 +316,8 @@ function formatJobType(type: string) {
     "part-time": "Part-time",
 
     project: "Project",
-
     contract: "Contract",
-
     internship: "Internship",
-
     temporary: "Temporary",
   };
 
