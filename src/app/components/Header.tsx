@@ -1,6 +1,6 @@
-import PendingSubmitButton from "@/app/components/PendingSubmitButton";
+import SignOutButton from "@/app/components/SignOutButton";
 
-import { getSignInUrl, getUser, signOut } from "@workos-inc/authkit-nextjs";
+import { getSignInUrl, getUser } from "@workos-inc/authkit-nextjs";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,27 +8,43 @@ import Link from "next/link";
 const ecosystemLinks = [
   {
     label: "Digital Solutions",
+
     href: "https://www.dev-champions.tech",
+
     ariaLabel:
       "Explore Dev Champions software development, AI, data and digital solutions",
   },
+
   {
     label: "Career Insights",
+
     href: "https://path.dev-champions.tech",
+
     ariaLabel:
       "Explore Tech Path career guidance and technology industry insights",
   },
+
   {
     label: "Tech Learning",
+
     href: "https://core.dev-champions.tech",
+
     ariaLabel:
       "Explore Tech Core developer tutorials and technical learning resources",
   },
 ];
 
 export default async function Header() {
+  /*
+   * Authentication state is resolved
+   * server-side before Header renders.
+   */
   const { user } = await getUser();
 
+  /*
+   * WorkOS generates the secure
+   * authorization URL server-side.
+   */
   const signInUrl = await getSignInUrl();
 
   return (
@@ -93,19 +109,13 @@ export default async function Header() {
               Login
             </Link>
           ) : (
-            <form
-              action={async () => {
-                "use server";
-
-                await signOut();
-              }}
-            >
-              <PendingSubmitButton
-                idleText="Logout"
-                pendingText="Signing out..."
-                className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 sm:px-4"
-              />
-            </form>
+            /*
+             * SignOutButton is a client UI
+             * wrapper, but it submits to
+             * POST /sign-out where the real
+             * WorkOS logout happens.
+             */
+            <SignOutButton />
           )}
 
           <Link

@@ -16,16 +16,44 @@
 //   ]
 // };
 
-import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
+// import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
 
-export default authkitMiddleware();
+// export default authkitMiddleware();
+
+// export const config = {
+//   matcher: [
+//     /*
+//      * Run AuthKit on application routes while skipping
+//      * Next.js internal assets and common static images.
+//      */
+//     '/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+//   ],
+// };
+
+
+import {
+  authkitMiddleware,
+} from "@workos-inc/authkit-nextjs";
+
+const redirectUri =
+  (
+    process.env.WORKOS_REDIRECT_URI ||
+    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ||
+    ""
+  ).trim();
+
+if (!redirectUri) {
+  throw new Error(
+    "WORKOS_REDIRECT_URI is not configured."
+  );
+}
+
+export default authkitMiddleware({
+  redirectUri,
+});
 
 export const config = {
   matcher: [
-    /*
-     * Run AuthKit on application routes while skipping
-     * Next.js internal assets and common static images.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
