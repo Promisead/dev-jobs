@@ -3,8 +3,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'devs-job-board.s3.amazonaws.com',
+        protocol: "https",
+        hostname: "res.cloudinary.com",
       },
     ],
   },

@@ -1,12 +1,25 @@
-'use client';
+"use client";
 import { saveJobAction } from "@/app/actions/jobActions";
 import ImageUpload from "@/app/components/ImageUpload";
 import type { Job } from "@/models/Job";
-import { faEnvelope, faPhone, faStar, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faPhone,
+  faStar,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, RadioGroup, TextArea, TextField, Theme } from "@radix-ui/themes";
+import {
+  Button,
+  RadioGroup,
+  TextArea,
+  TextField,
+  Theme,
+} from "@radix-ui/themes";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import "react-country-state-city/dist/react-country-state-city.css";
 import {
   CitySelect,
@@ -14,28 +27,41 @@ import {
   StateSelect,
 } from "react-country-state-city";
 
-export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job }) {
-  const [countryId, setCountryId] = useState<number>(Number(jobDoc?.countryId ?? 0));
+export default function JobForm({
+  orgId,
+  jobDoc,
+}: {
+  orgId: string;
+  jobDoc?: Job;
+}) {
+  const router = useRouter();
+  const [countryId, setCountryId] = useState<number>(
+    Number(jobDoc?.countryId ?? 0),
+  );
   const [stateId, setStateId] = useState<number>(Number(jobDoc?.stateId ?? 0));
   const [cityId, setCityId] = useState<number>(Number(jobDoc?.cityId ?? 0));
-  const [countryName, setCountryName] = useState(jobDoc?.country || '');
-  const [stateName, setStateName] = useState(jobDoc?.state || '');
-  const [cityName, setCityName] = useState(jobDoc?.city || '');
+  const [countryName, setCountryName] = useState(jobDoc?.country || "");
+  const [stateName, setStateName] = useState(jobDoc?.state || "");
+  const [cityName, setCityName] = useState(jobDoc?.city || "");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   async function handleSaveJob(data: FormData) {
     // Validate inputs
     const newErrors: Record<string, string> = {};
-    if (!data.get('title')) newErrors.title = 'Job title is required.';
-    if (!data.get('description')) newErrors.description = 'Job description is required.';
-    if (!data.get('salary')) newErrors.salary = 'Salary is required.';
-    if (!countryName) newErrors.country = 'Country is required.';
-    if (!stateName) newErrors.state = 'State is required.';
-    if (!cityName) newErrors.city = 'City is required.';
-    if (!data.get('contactName')) newErrors.contactName = 'Contact name is required.';
-    if (!data.get('contactPhone')) newErrors.contactPhone = 'Contact phone is required.';
-    if (!data.get('contactEmail')) newErrors.contactEmail = 'Contact email is required.';
+    if (!data.get("title")) newErrors.title = "Job title is required.";
+    if (!data.get("description"))
+      newErrors.description = "Job description is required.";
+    if (!data.get("salary")) newErrors.salary = "Salary is required.";
+    if (!countryName) newErrors.country = "Country is required.";
+    if (!stateName) newErrors.state = "State is required.";
+    if (!cityName) newErrors.city = "City is required.";
+    if (!data.get("contactName"))
+      newErrors.contactName = "Contact name is required.";
+    if (!data.get("contactPhone"))
+      newErrors.contactPhone = "Contact phone is required.";
+    if (!data.get("contactEmail"))
+      newErrors.contactEmail = "Contact email is required.";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -44,42 +70,49 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
 
     // Clear errors and proceed
     setErrors({});
-    data.set('country', countryName);
-    data.set('state', stateName);
-    data.set('city', cityName);
-    data.set('countryId', countryId.toString());
-    data.set('stateId', stateId.toString());
-    data.set('cityId', cityId.toString());
-    data.set('orgId', orgId);
-    const jobDoc = await saveJobAction(data);
-    redirect(`/jobs/${jobDoc.orgId}`);
+    data.set("country", countryName);
+    data.set("state", stateName);
+    data.set("city", cityName);
+    data.set("countryId", countryId.toString());
+    data.set("stateId", stateId.toString());
+    data.set("cityId", cityId.toString());
+    data.set("orgId", orgId);
+    const savedJob = await saveJobAction(data);
+
+    router.push(`/jobs/${savedJob.orgId}`);
+    router.refresh();
   }
 
   return (
     <Theme>
       <form
-  onSubmit={(e) => {
-    e.preventDefault(); // Prevent the default form submission
-    const formData = new FormData(e.target as HTMLFormElement); // Access the form element
-    handleSaveJob(formData); // Call your save function
-  }}
-  className="container mt-6 flex flex-col gap-4"
->
+        onSubmit={(e) => {
+          e.preventDefault(); // Prevent the default form submission
+          const formData = new FormData(e.target as HTMLFormElement); // Access the form element
+          handleSaveJob(formData); // Call your save function
+        }}
+        className="container mt-6 flex flex-col gap-4"
+      >
         {jobDoc && <input type="hidden" name="id" value={jobDoc._id} />}
 
         <div>
           <TextField.Root
             name="title"
-             placeholder="Job title"
-            defaultValue={jobDoc?.title || ''}
+            placeholder="Job title"
+            defaultValue={jobDoc?.title || ""}
           />
-          {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+          {errors.title && (
+            <p className="text-red-500 text-sm">{errors.title}</p>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-3 gap-6 *:grow">
           <div>
             Remote?
-            <RadioGroup.Root defaultValue={jobDoc?.remote || 'hybrid'} name="remote">
+            <RadioGroup.Root
+              defaultValue={jobDoc?.remote || "hybrid"}
+              name="remote"
+            >
               <RadioGroup.Item value="onsite">On-site</RadioGroup.Item>
               <RadioGroup.Item value="hybrid">Hybrid-remote</RadioGroup.Item>
               <RadioGroup.Item value="remote">Fully remote</RadioGroup.Item>
@@ -87,7 +120,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
           </div>
           <div>
             Full time?
-            <RadioGroup.Root defaultValue={jobDoc?.type || 'full'} name="type">
+            <RadioGroup.Root defaultValue={jobDoc?.type || "full"} name="type">
               <RadioGroup.Item value="project">Project</RadioGroup.Item>
               <RadioGroup.Item value="part">Part-time</RadioGroup.Item>
               <RadioGroup.Item value="full">Full-time</RadioGroup.Item>
@@ -95,11 +128,13 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
           </div>
           <div>
             Salary
-            <TextField.Root name="salary" defaultValue={jobDoc?.salary || ''}>
+            <TextField.Root name="salary" defaultValue={jobDoc?.salary || ""}>
               <TextField.Slot>₦</TextField.Slot>
               <TextField.Slot>k/per month</TextField.Slot>
             </TextField.Root>
-            {errors.salary && <p className="text-red-500 text-sm">{errors.salary}</p>}
+            {errors.salary && (
+              <p className="text-red-500 text-sm">{errors.salary}</p>
+            )}
           </div>
         </div>
 
@@ -109,7 +144,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <CountrySelect
               defaultValue={
                 countryId && countryName
-                  ? { id: countryId, name: countryName } as any
+                  ? ({ id: countryId, name: countryName } as any)
                   : undefined
               }
               onChange={(e: any) => {
@@ -118,11 +153,13 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select Country"
             />
-            {errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
+            {errors.country && (
+              <p className="text-red-500 text-sm">{errors.country}</p>
+            )}
             <StateSelect
               defaultValue={
                 stateId && stateName
-                  ? { id: stateId, name: stateName } as any
+                  ? ({ id: stateId, name: stateName } as any)
                   : undefined
               }
               countryid={countryId}
@@ -132,11 +169,13 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select State"
             />
-            {errors.state && <p className="text-red-500 text-sm">{errors.state}</p>}
+            {errors.state && (
+              <p className="text-red-500 text-sm">{errors.state}</p>
+            )}
             <CitySelect
               defaultValue={
                 cityId && cityName
-                  ? { id: cityId, name: cityName } as any
+                  ? ({ id: cityId, name: cityName } as any)
                   : undefined
               }
               countryid={countryId}
@@ -147,18 +186,22 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               }}
               placeHolder="Select City"
             />
-            {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
+            {errors.city && (
+              <p className="text-red-500 text-sm">{errors.city}</p>
+            )}
           </div>
         </div>
 
         <div>
           <TextArea
-            defaultValue={jobDoc?.description || ''}
+            defaultValue={jobDoc?.description || ""}
             placeholder="Job description"
             resize="vertical"
             name="description"
           />
-          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+          {errors.description && (
+            <p className="text-red-500 text-sm">{errors.description}</p>
+          )}
         </div>
 
         <div className="sm:flex">
@@ -167,7 +210,7 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
             <ImageUpload
               name="jobIcon"
               icon={faStar}
-              defaultValue={jobDoc?.jobIcon || ''}
+              defaultValue={jobDoc?.jobIcon || ""}
             />
           </div>
           <div className="grow">
@@ -176,29 +219,35 @@ export default function JobForm({ orgId, jobDoc }: { orgId: string; jobDoc?: Job
               <ImageUpload
                 name="contactPhoto"
                 icon={faUser}
-                defaultValue={jobDoc?.contactPhoto || ''}
+                defaultValue={jobDoc?.contactPhoto || ""}
               />
               <div className="grow flex flex-col gap-1">
                 <TextField.Root
                   placeholder="John Doe"
                   name="contactName"
-                  defaultValue={jobDoc?.contactName || ''}
+                  defaultValue={jobDoc?.contactName || ""}
                 />
-                {errors.contactName && <p className="text-red-500 text-sm">{errors.contactName}</p>}
+                {errors.contactName && (
+                  <p className="text-red-500 text-sm">{errors.contactName}</p>
+                )}
                 <TextField.Root
                   placeholder="Phone"
                   type="tel"
                   name="contactPhone"
-                  defaultValue={jobDoc?.contactPhone || ''}
+                  defaultValue={jobDoc?.contactPhone || ""}
                 />
-                {errors.contactPhone && <p className="text-red-500 text-sm">{errors.contactPhone}</p>}
+                {errors.contactPhone && (
+                  <p className="text-red-500 text-sm">{errors.contactPhone}</p>
+                )}
                 <TextField.Root
                   placeholder="Email"
                   type="email"
                   name="contactEmail"
-                  defaultValue={jobDoc?.contactEmail || ''}
+                  defaultValue={jobDoc?.contactEmail || ""}
                 />
-                {errors.contactEmail && <p className="text-red-500 text-sm">{errors.contactEmail}</p>}
+                {errors.contactEmail && (
+                  <p className="text-red-500 text-sm">{errors.contactEmail}</p>
+                )}
               </div>
             </div>
           </div>

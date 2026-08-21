@@ -1,12 +1,12 @@
-'use client';
+"use client";
 import TimeAgo from "@/app/components/TimeAgo";
-import {Job, JobModel} from "@/models/Job";
-import {faHeart} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { Job, JobModel } from "@/models/Job";
+import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import Link from "next/link";
 
-export default function JobRow({jobDoc}:{jobDoc:Job}) {
+export default function JobRow({ jobDoc }: { jobDoc: Job }) {
   return (
     <>
       <div className="bg-white p-4 rounded-lg shadow-sm relative">
@@ -15,35 +15,55 @@ export default function JobRow({jobDoc}:{jobDoc:Job}) {
         </div>
         <div className="flex grow gap-4">
           <div className="content-center w-12 basis-12 shrink-0">
-            <img
-              className="size-12"
-              src={jobDoc?.jobIcon} alt=""/>
+            <div className="relative size-12 rounded-md bg-gray-100 overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center text-xl">
+                💼
+              </div>
+
+              {jobDoc?.jobIcon && (
+                <img
+                  className="relative z-10 size-12 object-contain bg-white"
+                  src={jobDoc.jobIcon}
+                  alt={`${jobDoc.orgName || "Company"} logo`}
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
+            </div>
           </div>
           <div className="grow sm:flex">
             <div className="grow">
               <div>
-                <Link href={`/jobs/${jobDoc.orgId}`} className="hover:underline text-gray-500 text-sm">{jobDoc.orgName || '?'}</Link>
+                <Link
+                  href={`/jobs/${jobDoc.orgId}`}
+                  className="hover:underline text-gray-500 text-sm"
+                >
+                  {jobDoc.orgName || "?"}
+                </Link>
               </div>
               <div className="font-bold text-lg mb-1">
-                <Link className="hover:underline" href={'/show/'+jobDoc._id}>{jobDoc.title}</Link>
+                <Link className="hover:underline" href={"/show/" + jobDoc._id}>
+                  {jobDoc.title}
+                </Link>
               </div>
               <div className="text-gray-400 text-sm capitalize">
-                {jobDoc.remote}
-                {' '}&middot;{' '}
-                {jobDoc.city}, {jobDoc.country}
-                {' '}&middot;{' '}
-                {jobDoc.type}-time
+                {jobDoc.remote} &middot; {jobDoc.city}, {jobDoc.country}{" "}
+                &middot; {jobDoc.type}-time
                 {jobDoc.isAdmin && (
                   <>
-                    {' '}&middot;{' '}
-                    <Link href={'/jobs/edit/'+jobDoc._id}>Edit</Link>
-                    {' '}&middot;{' '}
+                    {" "}
+                    &middot; <Link href={"/jobs/edit/" + jobDoc._id}>
+                      Edit
+                    </Link>{" "}
+                    &middot;{" "}
                     <button
                       type="button"
                       onClick={async () => {
-                        await axios.delete('/api/jobs?id='+jobDoc._id);
+                        await axios.delete("/api/jobs?id=" + jobDoc._id);
                         window.location.reload();
-                      }}>
+                      }}
+                    >
                       Delete
                     </button>
                   </>
