@@ -1,3 +1,4 @@
+import InstallAppButton from "@/app/components/InstallAppButton";
 import SignOutButton from "@/app/components/SignOutButton";
 
 import { getSignInUrl, getUser } from "@workos-inc/authkit-nextjs";
@@ -35,16 +36,8 @@ const ecosystemLinks = [
 ];
 
 export default async function Header() {
-  /*
-   * Authentication state is resolved
-   * server-side before Header renders.
-   */
   const { user } = await getUser();
 
-  /*
-   * WorkOS generates the secure
-   * authorization URL server-side.
-   */
   const signInUrl = await getSignInUrl();
 
   return (
@@ -54,7 +47,7 @@ export default async function Header() {
         <Link
           href="/"
           className="flex shrink-0 items-center gap-3"
-          aria-label="Jobs home"
+          aria-label="Dev Champions Jobs home"
         >
           <Image
             src="/images/logo/logo_web.png"
@@ -96,11 +89,22 @@ export default async function Header() {
           ))}
         </nav>
 
-        {/* ACCOUNT ACTIONS */}
+        {/* ACCOUNT + APP ACTIONS */}
         <nav
           className="flex items-center gap-2 sm:gap-3"
-          aria-label="Account actions"
+          aria-label="Account and app actions"
         >
+          {/*
+           * PWA INSTALL
+           *
+           * Desktop:
+           * icon + label when space allows.
+           *
+           * Mobile/tablet:
+           * compact icon button.
+           */}
+          <InstallAppButton />
+
           {!user ? (
             <Link
               href={signInUrl}
@@ -109,12 +113,6 @@ export default async function Header() {
               Login
             </Link>
           ) : (
-            /*
-             * SignOutButton is a client UI
-             * wrapper, but it submits to
-             * POST /sign-out where the real
-             * WorkOS logout happens.
-             */
             <SignOutButton />
           )}
 

@@ -2,17 +2,12 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 
 import { SITE } from "@/lib/site";
-
-// import { GoogleAnalytics } from "@next/third-parties/google";
-
-// import { Analytics } from "@vercel/analytics/react";
-
-// import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
+import PwaRegistrar from "@/app/components/PwaRegistrar";
 
 import ConsentAwareAnalytics from "@/app/components/ConsentAwareAnalytics";
 import ConsentManager from "@/app/components/ConsentManager";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "@fontsource/caladea/400.css";
 import "@fontsource/caladea/400-italic.css";
@@ -21,6 +16,12 @@ import "@fontsource/caladea/700.css";
 import "@radix-ui/themes/styles.css";
 
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#077998",
+
+  colorScheme: "light",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -67,6 +68,16 @@ export const metadata: Metadata = {
     },
   },
 
+  manifest: "/manifest.webmanifest",
+
+  appleWebApp: {
+    capable: true,
+
+    title: "D•C Jobs",
+
+    statusBarStyle: "default",
+  },
+
   openGraph: {
     type: "website",
 
@@ -92,7 +103,37 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/favicon.jpg",
+    icon: [
+      {
+        url: "/favicon.jpg",
+      },
+
+      {
+        url: "/icons/icon-192.png",
+
+        sizes: "192x192",
+
+        type: "image/png",
+      },
+
+      {
+        url: "/icons/icon-512.png",
+
+        sizes: "512x512",
+
+        type: "image/png",
+      },
+    ],
+
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+
+        sizes: "180x180",
+
+        type: "image/png",
+      },
+    ],
   },
 };
 
@@ -153,6 +194,8 @@ export default function RootLayout({
   return (
     <html lang={SITE.language}>
       <body>
+        <PwaRegistrar />
+
         <ConsentAwareAnalytics />
 
         <ConsentManager />
