@@ -550,8 +550,8 @@ export default function InstallAppButton() {
         type="button"
         onClick={openInstallModal}
         title="Install D•C Jobs"
-        aria-label="Install Dev Champions Jobs app"
-        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#077998]/20 bg-[#077998]/10 px-2.5 text-sm font-semibold text-[#077998] transition hover:border-[#077998]/40 hover:bg-[#077998]/15 sm:px-3"
+        aria-label="Install D•C Jobs app"
+        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#077998]/20 bg-[#077998]/10 px-2.5 text-xs font-semibold text-[#077998] transition hover:border-[#077998]/40 hover:bg-[#077998]/15 min-[430px]:px-3 sm:text-sm"
       >
         <svg
           viewBox="0 0 24 24"
@@ -561,18 +561,22 @@ export default function InstallAppButton() {
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
-          className="h-[18px] w-[18px]"
+          className="h-[18px] w-[18px] shrink-0"
         >
           <path d="M12 3v11" />
-
           <path d="m8 10 4 4 4-4" />
-
           <path d="M5 20h14" />
         </svg>
 
-        <span className="hidden xl:inline">Install App</span>
+        {/*
+         * Hidden on very small phones.
+         */}
+        <span className="hidden min-[430px]:inline">Install</span>
 
-        <span className="xl:hidden">Install</span>
+        {/*
+         * Full wording only on large desktop.
+         */}
+        <span className="hidden xl:inline">App</span>
       </button>
 
       {installModal}

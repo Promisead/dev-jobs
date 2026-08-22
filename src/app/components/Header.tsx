@@ -9,27 +9,21 @@ import Link from "next/link";
 const ecosystemLinks = [
   {
     label: "Digital Solutions",
-
     href: "https://www.dev-champions.tech",
-
     ariaLabel:
       "Explore Dev Champions software development, AI, data and digital solutions",
   },
 
   {
     label: "Career Insights",
-
     href: "https://path.dev-champions.tech",
-
     ariaLabel:
       "Explore Tech Path career guidance and technology industry insights",
   },
 
   {
     label: "Tech Learning",
-
     href: "https://core.dev-champions.tech",
-
     ariaLabel:
       "Explore Tech Core developer tutorials and technical learning resources",
   },
@@ -42,37 +36,49 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* BRAND */}
+      {/*
+       * ========================================
+       * MAIN NAVBAR
+       * ========================================
+       */}
+      <div className="mx-auto flex min-h-[64px] max-w-7xl items-center justify-between gap-2 px-3 sm:min-h-[72px] sm:px-5 lg:px-8">
+        {/*
+         * BRAND
+         */}
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-3"
           aria-label="Dev Champions Jobs home"
+          className="flex min-w-0 shrink items-center gap-2 sm:gap-3"
         >
           <Image
             src="/images/logo/logo_web.png"
             alt="Dev Champions logo"
-            width={52}
-            height={52}
-            className="h-11 w-11 object-contain sm:h-12 sm:w-12"
+            width={48}
+            height={48}
             priority
             unoptimized
+            className="h-9 w-9 shrink-0 object-contain min-[390px]:h-10 min-[390px]:w-10 sm:h-12 sm:w-12"
           />
 
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold tracking-tight text-[#077998] sm:text-3xl">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+            <span className="whitespace-nowrap text-xl font-bold tracking-tight text-[#077998] min-[390px]:text-2xl sm:text-3xl">
               D•C
             </span>
 
-            <span className="text-2xl font-bold tracking-tight text-[#8A1D4F] sm:text-3xl">
+            {/*
+             * Hide "Jobs" only on extremely narrow screens.
+             */}
+            <span className="hidden whitespace-nowrap text-xl font-bold tracking-tight text-[#8A1D4F] min-[370px]:inline min-[390px]:text-2xl sm:text-3xl">
               Jobs
             </span>
           </div>
         </Link>
 
-        {/* DESKTOP ECOSYSTEM */}
+        {/*
+         * DESKTOP ECOSYSTEM
+         */}
         <nav
-          className="hidden items-center gap-7 lg:flex"
+          className="hidden items-center gap-6 lg:flex xl:gap-7"
           aria-label="Dev Champions ecosystem"
         >
           {ecosystemLinks.map((item) => (
@@ -82,35 +88,49 @@ export default async function Header() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={item.ariaLabel}
-              className="text-sm font-semibold text-gray-600 transition hover:text-[#077998]"
+              className="whitespace-nowrap text-sm font-semibold text-gray-600 transition hover:text-[#077998]"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        {/* ACCOUNT + APP ACTIONS */}
+        {/*
+         * ACCOUNT / PWA ACTIONS
+         */}
         <nav
-          className="flex items-center gap-2 sm:gap-3"
+          className="flex shrink-0 items-center gap-1.5 sm:gap-2.5"
           aria-label="Account and app actions"
         >
-          {/*
-           * PWA INSTALL
-           *
-           * Desktop:
-           * icon + label when space allows.
-           *
-           * Mobile/tablet:
-           * compact icon button.
-           */}
           <InstallAppButton />
 
           {!user ? (
             <Link
               href={signInUrl}
-              className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 sm:px-4"
+              aria-label="Login"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-2.5 text-xs font-semibold text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 min-[430px]:px-3 sm:px-4 sm:text-sm"
             >
-              Login
+              <span className="hidden min-[390px]:inline">Login</span>
+
+              {/*
+               * Icon-only login on very narrow phones
+               */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="h-[18px] w-[18px] min-[390px]:hidden"
+              >
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+
+                <path d="m10 17 5-5-5-5" />
+
+                <path d="M15 12H3" />
+              </svg>
             </Link>
           ) : (
             <SignOutButton />
@@ -118,19 +138,48 @@ export default async function Header() {
 
           <Link
             href="/new-listing"
-            className="rounded-lg bg-[#077998] px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#066982] sm:px-5"
+            aria-label="Post a Job"
+            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-[#077998] px-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#066982] min-[430px]:px-3 sm:px-4 sm:text-sm md:px-5"
           >
-            <span className="hidden sm:inline">Post a Job</span>
+            {/*
+             * Plus icon stays on all screen sizes
+             */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+              className="h-4 w-4 shrink-0"
+            >
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
 
-            <span className="sm:hidden">Post Job</span>
+            {/*
+             * Small phones:
+             * icon only.
+             */}
+            <span className="hidden min-[400px]:inline sm:hidden">Post</span>
+
+            {/*
+             * Tablet / desktop:
+             * full label.
+             */}
+            <span className="hidden sm:inline">Post a Job</span>
           </Link>
         </nav>
       </div>
 
-      {/* MOBILE ECOSYSTEM */}
+      {/*
+       * ========================================
+       * MOBILE ECOSYSTEM
+       * ========================================
+       */}
       <div className="border-t border-gray-100 bg-white lg:hidden">
         <nav
-          className="mx-auto flex max-w-7xl items-center gap-6 overflow-x-auto px-4 py-3 sm:px-6"
+          className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-4 py-2.5 sm:justify-center sm:gap-7 sm:px-6"
           aria-label="Dev Champions network"
         >
           {ecosystemLinks.map((item) => (
@@ -140,7 +189,7 @@ export default async function Header() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={item.ariaLabel}
-              className="shrink-0 text-sm font-semibold text-gray-500 transition hover:text-[#077998]"
+              className="shrink-0 whitespace-nowrap text-xs font-semibold text-gray-500 transition hover:text-[#077998] min-[390px]:text-sm"
             >
               {item.label}
             </Link>
