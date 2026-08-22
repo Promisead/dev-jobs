@@ -289,6 +289,37 @@ export function trackJobPublished({
 }
 
 /*
+ * Employer posting intent.
+ *
+ * This fires when someone clicks the
+ * Post / Post a Job CTA.
+ *
+ * It does NOT mean a job was published.
+ */
+export function trackPostJobClick({
+    source,
+    authenticationState,
+}: {
+    source:
+    | "header"
+    | "employer_access"
+    | "footer";
+
+    authenticationState:
+    | "authenticated"
+    | "anonymous";
+}) {
+    trackEvent(
+        "post_job_click",
+        {
+            source,
+            authentication_state:
+                authenticationState,
+        },
+    );
+}
+
+/*
  * Dev Champions authority/referral funnel.
  */
 export function trackEcosystemClick({
