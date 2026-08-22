@@ -4,6 +4,10 @@ import {
     sendGAEvent,
 } from "@next/third-parties/google";
 
+import {
+    hasAnalyticsConsent,
+} from "@/lib/consent";
+
 type AnalyticsValue =
     | string
     | number
@@ -21,6 +25,18 @@ export function trackEvent(
     params:
         AnalyticsParams = {}
 ) {
+    /*
+     * Privacy gate.
+     *
+     * Never send GA events until the visitor
+     * has explicitly allowed analytics.
+     */
+    if (
+        !hasAnalyticsConsent()
+    ) {
+        return;
+    }
+
     sendGAEvent(
         "event",
         eventName,

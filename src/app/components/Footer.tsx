@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-
+import CookieSettingsButton from "@/app/components/CookieSettingsButton";
 type FooterLink = {
   name: string;
   href: string;
@@ -305,6 +305,25 @@ export default function Footer() {
             >
               Tech Learning
             </Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-white"
+            >
+              Privacy
+            </Link>
+
+            <Link
+              href="/cookies"
+              className="transition-colors hover:text-white"
+            >
+              Cookies
+            </Link>
+
+            <Link href="/terms" className="transition-colors hover:text-white">
+              Terms
+            </Link>
+
+            <CookieSettingsButton />
           </nav>
         </div>
       </div>

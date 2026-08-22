@@ -76,4 +76,20 @@ export const SITE = {
         x:
             "https://x.com/Promisedukeac",
     },
+    legal: {
+        controllerName:
+            "Dev Champions IT",
+
+        businessAddress:
+            "Lagos Nigeria",
+
+        privacyEmail:
+            "info@dev-champions.tech",
+
+        privacyPhone:
+            "+2349115034504",
+
+        lastUpdated:
+            "10 August 2020",
+    },
 } as const;

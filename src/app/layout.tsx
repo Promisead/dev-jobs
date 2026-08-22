@@ -3,13 +3,16 @@ import Header from "@/app/components/Header";
 
 import { SITE } from "@/lib/site";
 
-import { GoogleAnalytics } from "@next/third-parties/google";
+// import { GoogleAnalytics } from "@next/third-parties/google";
 
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
+
+// import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
+
+import ConsentAwareAnalytics from "@/app/components/ConsentAwareAnalytics";
+import ConsentManager from "@/app/components/ConsentManager";
 
 import type { Metadata } from "next";
-
-import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
 
 import "@fontsource/caladea/400.css";
 import "@fontsource/caladea/400-italic.css";
@@ -150,9 +153,10 @@ export default function RootLayout({
   return (
     <html lang={SITE.language}>
       <body>
-        <EcosystemAnalytics />
+        <ConsentAwareAnalytics />
 
-        {/* ORGANIZATION SCHEMA */}
+        <ConsentManager />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -160,7 +164,6 @@ export default function RootLayout({
           }}
         />
 
-        {/* WEBSITE SCHEMA */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -170,14 +173,10 @@ export default function RootLayout({
 
         <Header />
 
-        <Analytics />
-
         {children}
 
         <Footer />
       </body>
-
-      {SITE.gaId && <GoogleAnalytics gaId={SITE.gaId} />}
     </html>
   );
 }
