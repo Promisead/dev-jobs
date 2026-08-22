@@ -2,40 +2,63 @@
 
 import InlineLoader from "@/app/components/InlineLoader";
 
+import { trackEvent, trackSearch } from "@/lib/analytics";
+
+import Link from "next/link";
+
 import { FormEvent, useRef, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 
 type SearchFilters = {
   q: string;
+
   remote: string;
+
   type: string;
+
   country: string;
+
   minSalary: string;
+
   maxSalary: string;
+
   sort: string;
 };
 
 type HeroProps = {
   filters: SearchFilters;
+
   countries: string[];
+
   total: number;
 };
 
 type PendingAction = "search" | "filters" | "clear" | null;
 
-export default function Hero({ filters, countries, total }: HeroProps) {
+function getStringValue(
+  formData: FormData,
+
+  key: string,
+) {
+  const value = formData.get(key);
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export default function Hero({
+  filters,
+
+  countries,
+
+  total,
+}: HeroProps) {
   const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
 
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  /*
-   * We keep a ref as well as state because
-   * button click + form submit can happen
-   * during the same React update cycle.
-   */
   const pendingActionRef = useRef<PendingAction>(null);
 
   const hasAdvancedFilters = Boolean(
@@ -60,14 +83,11 @@ export default function Hero({ filters, countries, total }: HeroProps) {
       return;
     }
 
-    /*
-     * If the user presses Enter inside
-     * the search field instead of clicking
-     * a button, treat it as a search.
-     */
     if (pendingActionRef.current === null) {
       setAction("search");
     }
+
+    const action = pendingActionRef.current;
 
     const form = event.currentTarget;
 
@@ -76,12 +96,12 @@ export default function Hero({ filters, countries, total }: HeroProps) {
     const params = new URLSearchParams();
 
     /*
-     * IMPORTANT:
-     * Use FormData.forEach rather than
-     * `for...of formData.entries()`.
+     * Keep FormData.forEach.
      *
-     * This avoids the downlevelIteration
-     * TypeScript build error in this project.
+     * This remains compatible with the
+     * project's TypeScript compilation
+     * target and avoids the previous
+     * downlevel iteration issue.
      */
     formData.forEach((rawValue, key) => {
       if (typeof rawValue !== "string") {
@@ -94,18 +114,6 @@ export default function Hero({ filters, countries, total }: HeroProps) {
         return;
       }
 
-      /*
-       * Do not put the default sorting
-       * option into the URL.
-       *
-       * This keeps:
-       *
-       * /
-       *
-       * instead of:
-       *
-       * /?sort=newest
-       */
       if (key === "sort" && value === "newest") {
         return;
       }
@@ -113,12 +121,30 @@ export default function Hero({ filters, countries, total }: HeroProps) {
       params.set(key, value);
     });
 
-    /*
-     * Pagination always returns to
-     * page 1 when doing a new search
-     * or applying different filters.
-     */
     params.delete("page");
+
+    /*
+     * ANALYTICS
+     */
+    if (action === "search") {
+      const searchTerm = getStringValue(formData, "q");
+
+      if (searchTerm) {
+        trackSearch(searchTerm);
+      }
+    }
+
+    if (action === "filters") {
+      trackEvent("job_filter_apply", {
+        work_mode: getStringValue(formData, "remote"),
+
+        employment_type: getStringValue(formData, "type"),
+
+        country: getStringValue(formData, "country"),
+
+        sort: getStringValue(formData, "sort"),
+      });
+    }
 
     const query = params.toString();
 
@@ -136,6 +162,8 @@ export default function Hero({ filters, countries, total }: HeroProps) {
 
     setAction("clear");
 
+    trackEvent("job_filter_clear");
+
     startTransition(() => {
       router.push("/");
     });
@@ -144,23 +172,74 @@ export default function Hero({ filters, countries, total }: HeroProps) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        {/* HERO HEADING */}
+        {/* HERO */}
         <div className="text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#077998]">
-            Career Opportunities
+            Technology Careers
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Find your next dream job
+            Find Tech Jobs in Nigeria & Remote Roles Across Africa
           </h1>
 
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-500 sm:text-lg">
-            Search opportunities by role, company, location, work mode,
-            employment type and other job details.
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-gray-500 sm:text-lg">
+            Discover software, engineering, AI, data, product, design and
+            digital opportunities across Lagos, Abuja, Ibadan, Ogun State,
+            Nigeria and remote teams.
           </p>
+
+          {/* SEO QUICK LINKS */}
+          <nav
+            aria-label="Popular job locations"
+            className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm"
+          >
+            <span className="font-medium text-gray-400">Explore:</span>
+
+            <Link
+              href="/locations/lagos"
+              className="font-semibold text-[#077998] transition hover:underline"
+            >
+              Lagos
+            </Link>
+
+            <Link
+              href="/locations/abuja"
+              className="font-semibold text-[#077998] transition hover:underline"
+            >
+              Abuja
+            </Link>
+
+            <Link
+              href="/locations/ibadan"
+              className="font-semibold text-[#077998] transition hover:underline"
+            >
+              Ibadan
+            </Link>
+
+            <Link
+              href="/locations/ogun"
+              className="font-semibold text-[#077998] transition hover:underline"
+            >
+              Ogun
+            </Link>
+
+            <Link
+              href="/locations/nigeria"
+              className="font-semibold text-[#077998] transition hover:underline"
+            >
+              Nigeria
+            </Link>
+
+            <Link
+              href="/remote-jobs"
+              className="font-semibold text-[#8A1D4F] transition hover:underline"
+            >
+              Remote
+            </Link>
+          </nav>
         </div>
 
-        {/* SEARCH + FILTER FORM */}
+        {/* SEARCH + FILTER */}
         <form onSubmit={handleSubmit} className="mt-8">
           {/* MAIN SEARCH */}
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -282,7 +361,7 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                   </select>
                 </label>
 
-                {/* MINIMUM SALARY */}
+                {/* MIN SALARY */}
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-700">
                     Minimum salary
@@ -299,7 +378,7 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                   />
                 </label>
 
-                {/* MAXIMUM SALARY */}
+                {/* MAX SALARY */}
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-gray-700">
                     Maximum salary
@@ -346,7 +425,6 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-                  {/* CLEAR FILTERS */}
                   <button
                     type="button"
                     disabled={isPending}
@@ -361,7 +439,6 @@ export default function Hero({ filters, countries, total }: HeroProps) {
                       : "Clear filters"}
                   </button>
 
-                  {/* APPLY FILTERS */}
                   <button
                     type="submit"
                     disabled={isPending}

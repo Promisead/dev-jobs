@@ -1,25 +1,146 @@
+import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { SITE } from "@/lib/site";
+
+import { GoogleAnalytics } from "@next/third-parties/google";
+
+import { Analytics } from "@vercel/analytics/react";
+
+import type { Metadata } from "next";
+
+import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
+
+import "@fontsource/caladea/400.css";
+import "@fontsource/caladea/400-italic.css";
+import "@fontsource/caladea/700.css";
+
 import "@radix-ui/themes/styles.css";
-import Link from "next/link";
-import Footer from "./components/Footer";
-import { Analytics } from "@vercel/analytics/react"
-import Script from 'next/script';
 
+import "./globals.css";
 
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
 
-const inter = Inter({ subsets: ["latin"] });
+  title: {
+    default: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
 
-export const metadata = {
-  title: 'Dev Champions',
-  description: 'Active for all Software related activities',
-  metadataBase: new URL('https://www.dev-champions.tech/jobs'),
-  alternates: {
-    canonical: '/',
+    template: "%s | Dev Champions Jobs",
+  },
+
+  description: SITE.description,
+
+  applicationName: SITE.name,
+
+  category: "Jobs and Careers",
+
+  authors: [
+    {
+      name: SITE.parent.name,
+
+      url: SITE.parent.url,
+    },
+  ],
+
+  creator: SITE.parent.name,
+
+  publisher: SITE.parent.name,
+
+  robots: {
+    index: true,
+
+    follow: true,
+
+    googleBot: {
+      index: true,
+
+      follow: true,
+
+      "max-image-preview": "large",
+
+      "max-snippet": -1,
+
+      "max-video-preview": -1,
+    },
+  },
+
+  openGraph: {
+    type: "website",
+
+    locale: SITE.locale,
+
+    siteName: SITE.name,
+
+    title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+
+    description: SITE.description,
+  },
+
+  twitter: {
+    card: "summary",
+
+    title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+
+    description: SITE.description,
+  },
+
+  verification: {
+    google: "LpKsqnwfUu-q-O2vxgUqSoAUGgcYN5eOkmcS-VkkToQ",
+  },
+
+  icons: {
+    icon: "/favicon.jpg",
   },
 };
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+
+  "@type": "Organization",
+
+  "@id": `${SITE.parent.url}/#organization`,
+
+  name: SITE.parent.name,
+
+  url: SITE.parent.url,
+
+  logo: `${SITE.url}/images/logo/logo_web.png`,
+
+  email: SITE.contact.email,
+
+  telephone: SITE.contact.phone,
+
+  sameAs: [
+    SITE.social.facebook,
+    SITE.social.instagram,
+    SITE.social.linkedin,
+    SITE.social.x,
+  ],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+
+  "@type": "WebSite",
+
+  "@id": `${SITE.url}/#website`,
+
+  name: SITE.name,
+
+  alternateName: SITE.shortName,
+
+  url: SITE.url,
+
+  inLanguage: SITE.language,
+
+  publisher: {
+    "@id": `${SITE.parent.url}/#organization`,
+  },
+};
+
+function safeJsonLd(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
 
 export default function RootLayout({
   children,
@@ -27,71 +148,36 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-       <head>
-        {/* Google Analytics */}
-        <Script async src="https://www.googletagmanager.com/gtag/js?id= G-51LQ058GNX" />
-        <Script
-          id="google-analytics"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', ' G-51LQ058GNX');
-            `,
-          }}
-        />
-        <meta name="google-site-verification" content="google-site-verification=LpKsqnwfUu-q-O2vxgUqSoAUGgcYN5eOkmcS-VkkToQ" />
-        <link rel="icon" href="/favicon.jpg" type="image/x-icon" />
-        <link rel="manifest" href="/manifest.json" />
-        <title>{metadata.title}</title>
-        <meta name="description" content={metadata.description} />
+    <html lang={SITE.language}>
+      <body>
+        <EcosystemAnalytics />
 
-        {/* Schema Markup - Organization & Website */}
-        <Script
-          id="schema-markup"
+        {/* ORGANIZATION SCHEMA */}
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Dev Champions",
-              "url": "https://www.dev-champions.tech/jobs", // Update to your actual URL
-              "logo": "https://www.dev-champions.tech/favicon.jpg",
-              "sameAs": [
-                "https://www.linkedin.com/company/dev-champions-i-t",
-                "https://www.twitter.com/dev_champions" // Add your real social links
-              ],
-              "description": "Active for all Software related activities"
-            }),
-          }}  
-        />
-        <Script
-          id="website-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "Dev Champions",
-              "url": "https://www.dev-champions.tech", // Update to your actual URL
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://www.dev-champions.tech/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            }),
+            __html: safeJsonLd(organizationSchema),
           }}
         />
-      </head>
-      <body className={inter.className}>
+
+        {/* WEBSITE SCHEMA */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: safeJsonLd(websiteSchema),
+          }}
+        />
+
         <Header />
+
         <Analytics />
+
         {children}
-     
+
         <Footer />
       </body>
+
+      {SITE.gaId && <GoogleAnalytics gaId={SITE.gaId} />}
     </html>
   );
 }

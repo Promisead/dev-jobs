@@ -1,13 +1,18 @@
 import Hero from "@/app/components/Hero";
 import Jobs from "@/app/components/Jobs";
+import SeoDiscoverySection from "@/app/components/SeoDiscoverySection";
 
 import { addOrgAndUserData, Job, JobModel } from "@/models/Job";
+
+import { SITE } from "@/lib/site";
 
 import { getUser } from "@workos-inc/authkit-nextjs";
 
 import type { FilterQuery } from "mongoose";
 
 import mongoose from "mongoose";
+
+import type { Metadata } from "next";
 
 const PAGE_SIZE = 10;
 
@@ -17,7 +22,11 @@ type HomeProps = {
   searchParams?: SearchParams;
 };
 
-function getParam(searchParams: SearchParams, key: string) {
+function getParam(
+  searchParams: SearchParams,
+
+  key: string,
+) {
   const value = searchParams[key];
 
   if (Array.isArray(value)) {
@@ -29,6 +38,65 @@ function getParam(searchParams: SearchParams, key: string) {
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/*
+ * Search/filter/pagination URLs are
+ * useful to users but should not become
+ * separate organic-search landing pages.
+ */
+function hasQueryParameters(searchParams: SearchParams) {
+  return Object.values(searchParams).some(
+    (value) => value !== undefined && value !== "",
+  );
+}
+
+export async function generateMetadata({
+  searchParams = {},
+}: HomeProps): Promise<Metadata> {
+  const filtered = hasQueryParameters(searchParams);
+
+  return {
+    title: "Tech Jobs in Nigeria & Africa",
+
+    description: SITE.description,
+
+    alternates: {
+      canonical: SITE.url,
+    },
+
+    robots: filtered
+      ? {
+          index: false,
+
+          follow: true,
+        }
+      : {
+          index: true,
+
+          follow: true,
+        },
+
+    openGraph: {
+      type: "website",
+
+      url: SITE.url,
+
+      siteName: SITE.name,
+
+      title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+
+      description: SITE.description,
+    },
+
+    twitter: {
+      card: "summary",
+
+      title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+
+      description: SITE.description,
+    },
+  };
 }
 
 export default async function Home({ searchParams = {} }: HomeProps) {
@@ -57,6 +125,7 @@ export default async function Home({ searchParams = {} }: HomeProps) {
 
   const requestedPage = Math.max(
     1,
+
     Number.parseInt(getParam(searchParams, "page"), 10) || 1,
   );
 
@@ -67,35 +136,56 @@ export default async function Home({ searchParams = {} }: HomeProps) {
 
   /*
    * GLOBAL JOB SEARCH
-   *
-   * Searches all meaningful searchable
-   * metadata rather than only job title.
    */
   if (q) {
     const regex = new RegExp(escapeRegex(q), "i");
 
     const searchConditions: FilterQuery<Job>[] = [
-      { title: regex },
-      { description: regex },
+      {
+        title: regex,
+      },
 
-      { orgName: regex },
+      {
+        description: regex,
+      },
 
-      { country: regex },
-      { state: regex },
-      { city: regex },
+      {
+        orgName: regex,
+      },
 
-      { remote: regex },
-      { type: regex },
+      {
+        country: regex,
+      },
 
-      { contactName: regex },
-      { contactEmail: regex },
-      { contactPhone: regex },
+      {
+        state: regex,
+      },
+
+      {
+        city: regex,
+      },
+
+      {
+        remote: regex,
+      },
+
+      {
+        type: regex,
+      },
+
+      {
+        contactName: regex,
+      },
+
+      {
+        contactEmail: regex,
+      },
+
+      {
+        contactPhone: regex,
+      },
     ];
 
-    /*
-     * If the complete search phrase is
-     * numeric, also allow salary matches.
-     */
     if (/^\d+(?:\.\d+)?$/.test(q)) {
       searchConditions.push({
         salary: Number(q),
@@ -135,6 +225,7 @@ export default async function Home({ searchParams = {} }: HomeProps) {
    */
   const salaryRange: {
     $gte?: number;
+
     $lte?: number;
   } = {};
 
@@ -168,11 +259,13 @@ export default async function Home({ searchParams = {} }: HomeProps) {
 
     "salary-high": {
       salary: -1,
+
       createdAt: -1,
     },
 
     "salary-low": {
       salary: 1,
+
       createdAt: -1,
     },
   };
@@ -180,7 +273,8 @@ export default async function Home({ searchParams = {} }: HomeProps) {
   const sort = sortOptions[sortParam] ?? sortOptions.newest;
 
   /*
-   * TOTAL COUNT + FILTER OPTIONS
+   * TOTAL COUNT +
+   * FILTER OPTIONS
    */
   const [totalJobs, rawCountries] = await Promise.all([
     JobModel.countDocuments(query),
@@ -195,15 +289,18 @@ export default async function Home({ searchParams = {} }: HomeProps) {
     )
     .sort((a, b) => a.localeCompare(b));
 
-  const totalPages = Math.max(1, Math.ceil(totalJobs / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+
+    Math.ceil(totalJobs / PAGE_SIZE),
+  );
 
   const currentPage = Math.min(requestedPage, totalPages);
 
   const skip = (currentPage - 1) * PAGE_SIZE;
 
   /*
-   * ONLY FETCH THE JOBS NEEDED FOR
-   * THE CURRENT PAGE.
+   * CURRENT PAGE JOBS
    */
   const jobDocs = await JobModel.find(query)
     .sort(sort)
@@ -214,11 +311,17 @@ export default async function Home({ searchParams = {} }: HomeProps) {
 
   const filterParams = {
     q,
+
     remote,
+
     type,
+
     country,
+
     minSalary,
+
     maxSalary,
+
     sort: sortParam,
   };
 
@@ -245,6 +348,8 @@ export default async function Home({ searchParams = {} }: HomeProps) {
         pageSize={PAGE_SIZE}
         searchParams={filterParams}
       />
+
+      {!hasSearch && <SeoDiscoverySection />}
     </>
   );
 }

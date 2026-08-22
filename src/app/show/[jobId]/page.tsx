@@ -1,8 +1,26 @@
+import BreadcrumbJsonLd from "@/app/components/BreadcrumbJsonLd";
+import JobApplyLink from "@/app/components/JobApplyLink";
+import JobPostingJsonLd from "@/app/components/JobPostingJsonLd";
 import JobRichContent from "@/app/components/JobRichContent";
+import JobViewTracker from "@/app/components/JobViewTracker";
 
-import { Job, JobModel } from "@/models/Job";
+import { getJobById } from "@/lib/getJobById";
 
-import mongoose from "mongoose";
+import {
+  formatJobPostedDate,
+  formatJobSalary,
+  formatJobType,
+  formatWorkMode,
+  getJobCanonicalUrl,
+  getJobLocationText,
+  getJobMetaDescription,
+  getJobMetaTitle,
+  isFullyRemote,
+} from "@/lib/jobSeo";
+
+import { SITE } from "@/lib/site";
+
+import type { Metadata } from "next";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,34 +35,145 @@ type PageProps = {
   };
 };
 
-export default async function SingleJobPage({ params }: PageProps) {
-  const { jobId } = params;
+/*
+ * ========================================
+ * DYNAMIC JOB METADATA
+ * ========================================
+ */
 
-  /*
-   * Prevent invalid MongoDB IDs from
-   * reaching findById().
-   */
-  if (!mongoose.isValidObjectId(jobId)) {
-    notFound();
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const jobDoc = await getJobById(params.jobId);
+
+  if (!jobDoc) {
+    return {
+      title: "Job Not Found",
+
+      robots: {
+        index: false,
+
+        follow: false,
+      },
+    };
   }
 
-  await mongoose.connect(process.env.MONGO_URI as string);
+  const jobId = String(jobDoc._id);
 
-  /*
-   * The existing JobModel is intentionally
-   * flexible and isn't strongly typed as
-   * mongoose.Model<Job>.
-   *
-   * Therefore explicitly narrow the result
-   * of this single-document query.
-   */
-  const rawJobDoc = await JobModel.findById(jobId).lean().exec();
+  const canonical = getJobCanonicalUrl(jobId);
 
-  const jobDoc = rawJobDoc as unknown as Job | null;
+  const title = getJobMetaTitle(jobDoc);
+
+  const description = getJobMetaDescription(jobDoc);
+
+  const companyName = jobDoc.orgName || "Hiring Company";
+
+  const hasJobIcon =
+    typeof jobDoc.jobIcon === "string" &&
+    jobDoc.jobIcon.startsWith("https://res.cloudinary.com/");
+
+  return {
+    /*
+     * Root layout adds:
+     *
+     * | Dev Champions Jobs
+     */
+    title,
+
+    description,
+
+    alternates: {
+      canonical,
+    },
+
+    robots: {
+      index: true,
+
+      follow: true,
+
+      googleBot: {
+        index: true,
+
+        follow: true,
+
+        "max-image-preview": "large",
+
+        "max-snippet": -1,
+
+        "max-video-preview": -1,
+      },
+    },
+
+    openGraph: {
+      type: "website",
+
+      url: canonical,
+
+      siteName: SITE.name,
+
+      title: `${title} | ${SITE.name}`,
+
+      description,
+
+      ...(hasJobIcon
+        ? {
+            images: [
+              {
+                url: jobDoc.jobIcon,
+
+                alt: `${companyName} logo`,
+              },
+            ],
+          }
+        : {}),
+    },
+
+    twitter: {
+      card: "summary",
+
+      title: `${title} | ${SITE.name}`,
+
+      description,
+
+      ...(hasJobIcon
+        ? {
+            images: [jobDoc.jobIcon],
+          }
+        : {}),
+    },
+  };
+}
+
+/*
+ * ========================================
+ * JOB PAGE
+ * ========================================
+ */
+
+export default async function SingleJobPage({ params }: PageProps) {
+  const jobDoc = await getJobById(params.jobId);
 
   if (!jobDoc) {
     notFound();
   }
+
+  const jobId = String(jobDoc._id);
+
+  const companyName = jobDoc.orgName || "Hiring Company";
+
+  const canonical = getJobCanonicalUrl(jobId);
+
+  const location = getJobLocationText(jobDoc);
+
+  const workMode = formatWorkMode(jobDoc.remote);
+
+  const employmentType = formatJobType(jobDoc.type);
+
+  const salary = formatJobSalary(jobDoc.salary);
+
+  const postedDate = formatJobPostedDate(jobDoc.createdAt);
+
+  const remote = isFullyRemote(jobDoc.remote);
 
   const hasJobIcon =
     typeof jobDoc.jobIcon === "string" &&
@@ -54,23 +183,62 @@ export default async function SingleJobPage({ params }: PageProps) {
     typeof jobDoc.contactPhoto === "string" &&
     jobDoc.contactPhoto.includes("res.cloudinary.com");
 
-  const companyName = jobDoc.orgName || "Company";
-
   const contactInitial =
     jobDoc.contactName?.trim().charAt(0).toUpperCase() || "?";
 
   return (
     <main className="min-h-screen bg-slate-50 pb-16">
+      {/* GOOGLE JOB POSTING */}
+      <JobPostingJsonLd job={jobDoc} />
+
+      {/* BREADCRUMB SCHEMA */}
+      <BreadcrumbJsonLd
+        items={[
+          {
+            name: SITE.name,
+
+            url: SITE.url,
+          },
+
+          {
+            name: jobDoc.title,
+
+            url: canonical,
+          },
+        ]}
+      />
+
+      {/* GA4 JOB VIEW */}
+      <JobViewTracker
+        jobId={jobId}
+        jobTitle={jobDoc.title}
+        companyName={companyName}
+        location={location}
+        employmentType={employmentType}
+        workMode={workMode}
+      />
+
       {/* JOB HERO */}
       <section className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[#077998]"
+          {/* VISIBLE BREADCRUMB */}
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-6 flex flex-wrap items-center gap-2 text-sm text-gray-500"
           >
-            <span aria-hidden="true">←</span>
-            Back to jobs
-          </Link>
+            <Link href="/" className="transition hover:text-[#077998]">
+              Jobs
+            </Link>
+
+            <span aria-hidden="true">/</span>
+
+            <span
+              aria-current="page"
+              className="max-w-[520px] truncate font-medium text-gray-700"
+            >
+              {jobDoc.title}
+            </span>
+          </nav>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 gap-5">
@@ -92,47 +260,50 @@ export default async function SingleJobPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* TITLE */}
+              {/* JOB IDENTITY */}
               <div className="min-w-0">
-                <p className="mb-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#077998]">
+                <Link
+                  href={`/jobs/${jobDoc.orgId}`}
+                  className="mb-2 inline-block text-sm font-semibold uppercase tracking-[0.12em] text-[#077998] transition hover:underline"
+                >
                   {companyName}
-                </p>
+                </Link>
 
                 <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
                   {jobDoc.title}
                 </h1>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <JobBadge>{formatRemote(jobDoc.remote)}</JobBadge>
+                  <JobBadge>{workMode}</JobBadge>
 
-                  <JobBadge>{formatJobType(jobDoc.type)}</JobBadge>
+                  <JobBadge>{employmentType}</JobBadge>
 
-                  <JobBadge>
-                    {[jobDoc.city, jobDoc.state, jobDoc.country]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </JobBadge>
+                  {location && <JobBadge>{location}</JobBadge>}
                 </div>
+
+                <p className="mt-4 text-sm text-gray-500">
+                  Posted <time dateTime={jobDoc.createdAt}>{postedDate}</time>
+                </p>
               </div>
             </div>
 
             {/* SALARY */}
             <div className="shrink-0 rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                Salary
+                Monthly salary
               </p>
 
               <p className="mt-1 text-xl font-bold text-emerald-900">
-                {formatSalary(jobDoc.salary)}
+                {salary}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* BODY */}
+      {/* PAGE BODY */}
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:px-8">
-        {/* DESCRIPTION */}
+        {/* JOB DESCRIPTION */}
         <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-7 border-b border-gray-100 pb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#077998]">
@@ -144,12 +315,26 @@ export default async function SingleJobPage({ params }: PageProps) {
             </h2>
           </div>
 
+          {/* REMOTE CLARIFICATION */}
+          {remote && (
+            <div className="mb-7 rounded-xl border border-[#077998]/15 bg-[#077998]/5 p-4">
+              <p className="font-semibold text-gray-900">
+                Fully remote position
+              </p>
+
+              <p className="mt-1 text-sm leading-6 text-gray-600">
+                This position is listed as fully remote. Applicant location:{" "}
+                <strong>{jobDoc.country}</strong>.
+              </p>
+            </div>
+          )}
+
           <JobRichContent description={jobDoc.description} />
         </article>
 
         {/* SIDEBAR */}
         <aside className="space-y-5 lg:sticky lg:top-28 lg:self-start">
-          {/* CONTACT */}
+          {/* APPLICATION */}
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#077998]">
               Application contact
@@ -160,7 +345,8 @@ export default async function SingleJobPage({ params }: PageProps) {
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-gray-500">
-              Contact the hiring team using the information below.
+              Contact the hiring team directly using the verified application
+              information supplied with this job.
             </p>
 
             <div className="mt-6 flex items-center gap-4">
@@ -189,20 +375,29 @@ export default async function SingleJobPage({ params }: PageProps) {
               </div>
             </div>
 
+            {/* APPLICATION CTA */}
             <div className="mt-6 space-y-3">
-              <a
+              <JobApplyLink
                 href={`mailto:${jobDoc.contactEmail}`}
+                method="email"
+                jobId={jobId}
+                jobTitle={jobDoc.title}
+                companyName={companyName}
                 className="flex w-full items-center justify-center rounded-lg bg-[#077998] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#066982]"
               >
                 Email hiring contact
-              </a>
+              </JobApplyLink>
 
-              <a
+              <JobApplyLink
                 href={`tel:${jobDoc.contactPhone}`}
+                method="phone"
+                jobId={jobId}
+                jobTitle={jobDoc.title}
+                companyName={companyName}
                 className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
               >
                 Call hiring contact
-              </a>
+              </JobApplyLink>
             </div>
 
             <div className="mt-5 border-t border-gray-100 pt-5 text-sm">
@@ -212,38 +407,70 @@ export default async function SingleJobPage({ params }: PageProps) {
             </div>
           </section>
 
-          {/* OVERVIEW */}
+          {/* JOB OVERVIEW */}
           <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="font-bold text-gray-950">Job overview</h2>
 
             <dl className="mt-5 space-y-4 text-sm">
               <SummaryRow label="Company" value={companyName} />
 
-              <SummaryRow
-                label="Work mode"
-                value={formatRemote(jobDoc.remote)}
-              />
+              <SummaryRow label="Work mode" value={workMode} />
+
+              <SummaryRow label="Employment" value={employmentType} />
 
               <SummaryRow
-                label="Employment"
-                value={formatJobType(jobDoc.type)}
+                label={remote ? "Applicant location" : "Location"}
+                value={location || "Not specified"}
               />
 
-              <SummaryRow
-                label="Location"
-                value={[jobDoc.city, jobDoc.state, jobDoc.country]
-                  .filter(Boolean)
-                  .join(", ")}
-              />
+              <SummaryRow label="Salary" value={salary} />
 
-              <SummaryRow label="Salary" value={formatSalary(jobDoc.salary)} />
+              <SummaryRow label="Posted" value={postedDate} />
             </dl>
+          </section>
+
+          {/* CAREER ECOSYSTEM */}
+          <section className="rounded-2xl border border-gray-200 bg-slate-50 p-6">
+            <h2 className="font-bold text-gray-950">
+              Prepare for opportunities
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Build your career knowledge and technical capability across the
+              Dev Champions ecosystem.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <Link
+                href={SITE.path.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm font-semibold text-[#077998] transition hover:underline"
+              >
+                Career & Industry Insights →
+              </Link>
+
+              <Link
+                href={SITE.core.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm font-semibold text-[#077998] transition hover:underline"
+              >
+                Developer Tutorials & Learning →
+              </Link>
+            </div>
           </section>
         </aside>
       </div>
     </main>
   );
 }
+
+/*
+ * ========================================
+ * PRESENTATIONAL HELPERS
+ * ========================================
+ */
 
 function JobBadge({ children }: { children: ReactNode }) {
   return (
@@ -253,7 +480,15 @@ function JobBadge({ children }: { children: ReactNode }) {
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function SummaryRow({
+  label,
+
+  value,
+}: {
+  label: string;
+
+  value: string;
+}) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
       <dt className="text-gray-500">{label}</dt>
@@ -261,46 +496,4 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
       <dd className="text-right font-semibold text-gray-800">{value}</dd>
     </div>
   );
-}
-
-function formatRemote(value: string) {
-  const normalized = value?.toLowerCase();
-
-  const labels: Record<string, string> = {
-    remote: "Remote",
-    onsite: "On-site",
-    "on-site": "On-site",
-    hybrid: "Hybrid",
-  };
-
-  return labels[normalized] || value;
-}
-
-function formatJobType(value: string) {
-  const normalized = value?.toLowerCase();
-
-  const labels: Record<string, string> = {
-    full: "Full-time",
-    "full-time": "Full-time",
-
-    part: "Part-time",
-    "part-time": "Part-time",
-
-    project: "Project",
-    contract: "Contract",
-    internship: "Internship",
-    temporary: "Temporary",
-  };
-
-  return labels[normalized] || value;
-}
-
-function formatSalary(salary: number) {
-  const amount = Number(salary);
-
-  if (!Number.isFinite(amount)) {
-    return "Not specified";
-  }
-
-  return `₦${amount.toLocaleString()}k / month`;
 }

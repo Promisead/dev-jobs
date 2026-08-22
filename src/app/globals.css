@@ -7,7 +7,17 @@ html {
 }
 
 body {
+  font-family: "Caladea", Georgia, "Times New Roman", serif;
+
   @apply bg-white text-gray-800 antialiased;
+}
+
+button,
+input,
+textarea,
+select,
+option {
+  font-family: inherit;
 }
 
 /* ========================================
@@ -204,10 +214,13 @@ body {
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   object-fit: contain;
+
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-/* QUILL ALIGNMENT */
+/* ========================================
+   QUILL ALIGNMENT
+======================================== */
 
 .job-rich-content .ql-align-center {
   text-align: center;
@@ -221,7 +234,9 @@ body {
   text-align: justify;
 }
 
-/* QUILL INDENTATION */
+/* ========================================
+   QUILL INDENTATION
+======================================== */
 
 .job-rich-content .ql-indent-1 {
   margin-left: 1.5rem;
@@ -255,7 +270,9 @@ body {
   margin-left: 12rem;
 }
 
-/* QUILL FONT SIZES */
+/* ========================================
+   QUILL FONT SIZES
+======================================== */
 
 .job-rich-content .ql-size-small {
   font-size: 0.875rem;
@@ -269,7 +286,9 @@ body {
   font-size: 1.75rem;
 }
 
-/* MOBILE RICH CONTENT */
+/* ========================================
+   MOBILE RICH CONTENT
+======================================== */
 
 @media (max-width: 640px) {
   .job-rich-editor .ql-editor {

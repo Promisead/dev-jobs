@@ -2,14 +2,20 @@ import Link from "next/link";
 
 type PaginationProps = {
   currentPage: number;
+
   totalPages: number;
 
   searchParams: Record<string, string | undefined>;
+
+  basePath?: string;
 };
 
 function createPageHref(
   page: number,
+
   searchParams: Record<string, string | undefined>,
+
+  basePath: string,
 ) {
   const params = new URLSearchParams();
 
@@ -20,7 +26,13 @@ function createPageHref(
   });
 
   /*
-   * Keep page 1 URL clean.
+   * Keep page-one URLs clean:
+   *
+   * /locations/lagos
+   *
+   * rather than:
+   *
+   * /locations/lagos?page=1
    */
   if (page > 1) {
     params.set("page", String(page));
@@ -28,17 +40,20 @@ function createPageHref(
 
   const query = params.toString();
 
-  return query ? `/?${query}` : "/";
+  return query ? `${basePath}?${query}` : basePath;
 }
 
 function getVisiblePages(currentPage: number, totalPages: number) {
   const pages = new Set<number>();
 
   pages.add(1);
+
   pages.add(totalPages);
 
   pages.add(currentPage);
+
   pages.add(currentPage - 1);
+
   pages.add(currentPage + 1);
 
   return Array.from(pages)
@@ -48,8 +63,12 @@ function getVisiblePages(currentPage: number, totalPages: number) {
 
 export default function Pagination({
   currentPage,
+
   totalPages,
+
   searchParams,
+
+  basePath = "/",
 }: PaginationProps) {
   if (totalPages <= 1) {
     return null;
@@ -65,7 +84,13 @@ export default function Pagination({
       {/* PREVIOUS */}
       {currentPage > 1 ? (
         <Link
-          href={createPageHref(currentPage - 1, searchParams)}
+          href={createPageHref(
+            currentPage - 1,
+
+            searchParams,
+
+            basePath,
+          )}
           className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
         >
           ← Previous
@@ -80,7 +105,7 @@ export default function Pagination({
       {visiblePages.map((page, index) => {
         const previousPage = visiblePages[index - 1];
 
-        const showEllipsis = previousPage && page - previousPage > 1;
+        const showEllipsis = Boolean(previousPage && page - previousPage > 1);
 
         return (
           <div key={page} className="flex items-center gap-2">
@@ -95,7 +120,13 @@ export default function Pagination({
               </span>
             ) : (
               <Link
-                href={createPageHref(page, searchParams)}
+                href={createPageHref(
+                  page,
+
+                  searchParams,
+
+                  basePath,
+                )}
                 className="flex h-10 min-w-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
               >
                 {page}
@@ -108,7 +139,13 @@ export default function Pagination({
       {/* NEXT */}
       {currentPage < totalPages ? (
         <Link
-          href={createPageHref(currentPage + 1, searchParams)}
+          href={createPageHref(
+            currentPage + 1,
+
+            searchParams,
+
+            basePath,
+          )}
           className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
         >
           Next →

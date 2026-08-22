@@ -2,6 +2,9 @@
 
 import InlineLoader from "@/app/components/InlineLoader";
 import TimeAgo from "@/app/components/TimeAgo";
+
+import { trackJobLike, trackJobSelect } from "@/lib/analytics";
+
 import { Job } from "@/models/Job";
 
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
@@ -28,9 +31,33 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
 
   const likeMessageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const hasCloudinaryImage =
-    Boolean(jobDoc?.jobIcon) && jobDoc.jobIcon.includes("res.cloudinary.com");
+  const jobId = String(jobDoc._id);
 
+  const companyName = jobDoc.orgName || "Company";
+
+  const hasCloudinaryImage =
+    Boolean(jobDoc.jobIcon) && jobDoc.jobIcon.includes("res.cloudinary.com");
+
+  /*
+   * ----------------------------------------
+   * JOB DETAIL CLICK
+   * ----------------------------------------
+   */
+  function handleJobOpen() {
+    trackJobSelect({
+      jobId,
+
+      jobTitle: jobDoc.title,
+
+      companyName,
+    });
+  }
+
+  /*
+   * ----------------------------------------
+   * LIKE / UNLIKE
+   * ----------------------------------------
+   */
   async function handleLikeJob() {
     if (isLiking) {
       return;
@@ -39,7 +66,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
     setIsLiking(true);
 
     try {
-      const response = await axios.post(`/api/jobs/${jobDoc._id}/like`);
+      const response = await axios.post(`/api/jobs/${jobId}/like`);
 
       const liked = Boolean(response.data.liked);
 
@@ -52,25 +79,41 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
       setLikeMessage(liked ? "You liked this post." : "Like removed.");
 
       /*
-       * This button is prepared for
-       * future Google Analytics / GTM
-       * click tracking through the
-       * data-ga-* attributes below.
-       *
-       * No GA event is sent yet.
+       * GA EVENT FIRES ONLY AFTER
+       * THE SERVER CONFIRMS SUCCESS.
        */
+      trackJobLike({
+        jobId,
+
+        jobTitle: jobDoc.title,
+
+        companyName,
+
+        liked,
+
+        likesCount: newLikesCount,
+      });
+
       if (likeMessageTimer.current) {
         clearTimeout(likeMessageTimer.current);
       }
 
-      likeMessageTimer.current = setTimeout(() => {
-        setLikeMessage("");
-      }, 2500);
+      likeMessageTimer.current = setTimeout(
+        () => {
+          setLikeMessage("");
+        },
+
+        2500,
+      );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         setLikeMessage("Sign in to like this post.");
       } else {
-        console.error("Failed to like job:", error);
+        console.error(
+          "Failed to like job:",
+
+          error,
+        );
 
         setLikeMessage("Unable to update your like.");
       }
@@ -79,14 +122,23 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
         clearTimeout(likeMessageTimer.current);
       }
 
-      likeMessageTimer.current = setTimeout(() => {
-        setLikeMessage("");
-      }, 3000);
+      likeMessageTimer.current = setTimeout(
+        () => {
+          setLikeMessage("");
+        },
+
+        3000,
+      );
     } finally {
       setIsLiking(false);
     }
   }
 
+  /*
+   * ----------------------------------------
+   * DELETE
+   * ----------------------------------------
+   */
   async function handleDeleteJob() {
     if (isDeleting) {
       return;
@@ -103,11 +155,15 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
     setIsDeleting(true);
 
     try {
-      await axios.delete(`/api/jobs?id=${jobDoc._id}`);
+      await axios.delete(`/api/jobs?id=${jobId}`);
 
       window.location.reload();
     } catch (error) {
-      console.error("Failed to delete job:", error);
+      console.error(
+        "Failed to delete job:",
+
+        error,
+      );
 
       setIsDeleting(false);
 
@@ -128,17 +184,6 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
           aria-label={
             isLiked ? `Unlike ${jobDoc.title}` : `Like ${jobDoc.title}`
           }
-          /*
-           * Ready for future GA/GTM.
-           *
-           * Later we can listen for:
-           * data-ga-event="job_like_click"
-           */
-          data-ga-event="job_like_click"
-          data-ga-job-id={jobDoc._id}
-          data-ga-job-title={jobDoc.title}
-          data-ga-company={jobDoc.orgName || ""}
-          data-ga-action={isLiked ? "unlike" : "like"}
           className="group inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-sm transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
         >
           {isLiking ? (
@@ -163,7 +208,6 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
           </span>
         </button>
 
-        {/* LIKE FEEDBACK */}
         {likeMessage && (
           <div
             role="status"
@@ -191,7 +235,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
             {hasCloudinaryImage && (
               <Image
                 src={jobDoc.jobIcon}
-                alt={`${jobDoc.orgName || "Company"} logo`}
+                alt={`${companyName} logo`}
                 width={48}
                 height={48}
                 className="relative z-10 h-12 w-12 bg-white object-contain"
@@ -212,14 +256,15 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
                 href={`/jobs/${jobDoc.orgId}`}
                 className="text-sm font-medium text-gray-500 transition hover:text-[#077998] hover:underline"
               >
-                {jobDoc.orgName || "Company"}
+                {companyName}
               </Link>
             </div>
 
             {/* TITLE */}
             <h2 className="mb-2 pr-2 text-lg font-bold leading-snug text-gray-900">
               <Link
-                href={`/show/${jobDoc._id}`}
+                href={`/show/${jobId}`}
+                onClick={handleJobOpen}
                 className="transition hover:text-[#077998] hover:underline"
               >
                 {jobDoc.title}
@@ -259,7 +304,7 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
             {jobDoc.isAdmin && (
               <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
                 <Link
-                  href={`/jobs/edit/${jobDoc._id}`}
+                  href={`/jobs/edit/${jobId}`}
                   className="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 font-medium text-gray-700 transition hover:border-gray-300 hover:bg-gray-100"
                 >
                   Edit
@@ -292,13 +337,22 @@ export default function JobRow({ jobDoc }: { jobDoc: Job }) {
   );
 }
 
+/*
+ * ========================================
+ * UI FORMATTERS
+ * ========================================
+ */
+
 function formatRemote(remote: string) {
   const value = remote.toLowerCase();
 
   const labels: Record<string, string> = {
     remote: "Remote",
+
     onsite: "On-site",
+
     "on-site": "On-site",
+
     hybrid: "Hybrid",
   };
 
@@ -310,14 +364,19 @@ function formatJobType(type: string) {
 
   const labels: Record<string, string> = {
     full: "Full-time",
+
     "full-time": "Full-time",
 
     part: "Part-time",
+
     "part-time": "Part-time",
 
     project: "Project",
+
     contract: "Contract",
+
     internship: "Internship",
+
     temporary: "Temporary",
   };
 
