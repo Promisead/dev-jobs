@@ -1,4 +1,8 @@
 import {
+    descriptionToPlainText,
+} from "@/lib/jobDescription";
+
+import type {
     Job,
 } from "@/models/Job";
 
@@ -7,7 +11,13 @@ import type {
 } from "@/models/PushSubscription";
 
 
-function normalize(
+/*
+ * ========================================
+ * NORMALIZATION
+ * ========================================
+ */
+
+function normalizeText(
     value:
         string,
 ) {
@@ -17,19 +27,175 @@ function normalize(
 }
 
 
-function matchesList(
-    selected:
+function normalizeStringArray(
+    value:
+        unknown,
+) {
+    if (
+        !Array.isArray(
+            value,
+        )
+    ) {
+        return [];
+    }
+
+
+    return value
+        .filter(
+            (
+                item,
+            ):
+                item is string =>
+                typeof item ===
+                "string",
+        )
+        .map(
+            (
+                item,
+            ) =>
+                item.trim(),
+        )
+        .filter(
+            Boolean,
+        );
+}
+
+
+/*
+ * ========================================
+ * LEGACY / DEFAULT PREFERENCES
+ * ========================================
+ *
+ * This is extremely important.
+ *
+ * A subscriber who enabled notifications
+ * before personalization existed may have
+ * no `preferences` object in MongoDB.
+ *
+ * Missing preferences therefore mean:
+ *
+ * - new jobs ON
+ * - announcements ON
+ * - no filtering restrictions
+ */
+
+export function normalizePushPreferences(
+    value:
+        unknown,
+):
+    PushPreferences {
+    const preferences =
+        typeof value ===
+            "object" &&
+            value !==
+            null
+            ? value as
+            Record<
+                string,
+                unknown
+            >
+            : {};
+
+
+    let minSalary:
+        number | null =
+        null;
+
+
+    if (
+        typeof preferences
+            .minSalary ===
+        "number" &&
+        Number.isFinite(
+            preferences
+                .minSalary,
+        ) &&
+        preferences
+            .minSalary >=
+        0
+    ) {
+        minSalary =
+            preferences
+                .minSalary;
+    }
+
+
+    return {
+        /*
+         * Only explicit false disables.
+         *
+         * undefined/missing therefore remains ON.
+         */
+        newJobs:
+            preferences
+                .newJobs !==
+            false,
+
+        specialAnnouncements:
+            preferences
+                .specialAnnouncements !==
+            false,
+
+        workModes:
+            normalizeStringArray(
+                preferences
+                    .workModes,
+            ),
+
+        jobTypes:
+            normalizeStringArray(
+                preferences
+                    .jobTypes,
+            ),
+
+        countries:
+            normalizeStringArray(
+                preferences
+                    .countries,
+            ),
+
+        states:
+            normalizeStringArray(
+                preferences
+                    .states,
+            ),
+
+        cities:
+            normalizeStringArray(
+                preferences
+                    .cities,
+            ),
+
+        keywords:
+            normalizeStringArray(
+                preferences
+                    .keywords,
+            ),
+
+        minSalary,
+    };
+}
+
+
+/*
+ * ========================================
+ * LIST MATCHING
+ * ========================================
+ *
+ * Empty selection means:
+ *
+ * ANY value is acceptable.
+ */
+
+function matchesSelectedValues(
+    selectedValues:
         string[],
 
-    actual:
+    actualValue:
         string,
 ) {
-    /*
-     * Empty preference means:
-     * "I don't care about this field."
-     */
     if (
-        selected.length ===
+        selectedValues.length ===
         0
     ) {
         return true;
@@ -37,22 +203,40 @@ function matchesList(
 
 
     const normalizedActual =
-        normalize(
-            actual,
+        normalizeText(
+            actualValue,
         );
 
 
-    return selected.some(
+    return selectedValues.some(
         (
-            item,
+            selectedValue,
         ) =>
-            normalize(
-                item,
+            normalizeText(
+                selectedValue,
             ) ===
             normalizedActual,
     );
 }
 
+
+/*
+ * ========================================
+ * KEYWORD MATCHING
+ * ========================================
+ *
+ * Any matching keyword is enough.
+ *
+ * Example:
+ *
+ * preferences:
+ * React, Node.js
+ *
+ * job:
+ * Senior React Developer
+ *
+ * => match
+ */
 
 function matchesKeywords(
     preferences:
@@ -71,23 +255,31 @@ function matchesKeywords(
     }
 
 
-    const haystack =
+    const plainDescription =
+        descriptionToPlainText(
+            job.description ||
+            "",
+        );
+
+
+    const searchableText =
         [
             job.title,
 
-            job.orgName,
+            job.orgName ||
+            "",
 
-            job.city,
+            plainDescription,
 
-            job.state,
+            job.remote,
+
+            job.type,
 
             job.country,
 
-            /*
-             * Description contains sanitized HTML,
-             * but keyword inclusion is still useful.
-             */
-            job.description,
+            job.state,
+
+            job.city,
         ]
             .filter(
                 Boolean,
@@ -103,23 +295,81 @@ function matchesKeywords(
         .some(
             (
                 keyword,
-            ) =>
-                haystack.includes(
-                    normalize(
+            ) => {
+                const normalizedKeyword =
+                    normalizeText(
                         keyword,
-                    ),
-                ),
+                    );
+
+
+                if (
+                    !normalizedKeyword
+                ) {
+                    return false;
+                }
+
+
+                return searchableText.includes(
+                    normalizedKeyword,
+                );
+            },
         );
 }
 
 
-export function matchesJobPreferences(
+/*
+ * ========================================
+ * SALARY MATCHING
+ * ========================================
+ */
+
+function matchesMinimumSalary(
     preferences:
         PushPreferences,
 
     job:
         Job,
 ) {
+    if (
+        preferences
+            .minSalary ===
+        null
+    ) {
+        return true;
+    }
+
+
+    return (
+        job.salary >=
+        preferences
+            .minSalary
+    );
+}
+
+
+/*
+ * ========================================
+ * MAIN JOB MATCHER
+ * ========================================
+ */
+
+export function matchesJobPreferences(
+    rawPreferences:
+        unknown,
+
+    job:
+        Job,
+) {
+    const preferences =
+        normalizePushPreferences(
+            rawPreferences,
+        );
+
+
+    /*
+     * User explicitly disabled
+     * automatic job notifications.
+     */
     if (
         !preferences
             .newJobs
@@ -128,8 +378,11 @@ export function matchesJobPreferences(
     }
 
 
+    /*
+     * Work mode.
+     */
     if (
-        !matchesList(
+        !matchesSelectedValues(
             preferences
                 .workModes,
 
@@ -140,8 +393,11 @@ export function matchesJobPreferences(
     }
 
 
+    /*
+     * Employment type.
+     */
     if (
-        !matchesList(
+        !matchesSelectedValues(
             preferences
                 .jobTypes,
 
@@ -152,8 +408,11 @@ export function matchesJobPreferences(
     }
 
 
+    /*
+     * Country.
+     */
     if (
-        !matchesList(
+        !matchesSelectedValues(
             preferences
                 .countries,
 
@@ -164,8 +423,11 @@ export function matchesJobPreferences(
     }
 
 
+    /*
+     * State.
+     */
     if (
-        !matchesList(
+        !matchesSelectedValues(
             preferences
                 .states,
 
@@ -176,8 +438,11 @@ export function matchesJobPreferences(
     }
 
 
+    /*
+     * City.
+     */
     if (
-        !matchesList(
+        !matchesSelectedValues(
             preferences
                 .cities,
 
@@ -188,23 +453,52 @@ export function matchesJobPreferences(
     }
 
 
-    const minimumSalary =
-        preferences
-            .minSalary;
-
-
+    /*
+     * Salary threshold.
+     */
     if (
-        typeof minimumSalary ===
-        "number" &&
-        job.salary <
-        minimumSalary
+        !matchesMinimumSalary(
+            preferences,
+
+            job,
+        )
     ) {
         return false;
     }
 
 
-    return matchesKeywords(
-        preferences,
-        job,
-    );
+    /*
+     * Keyword match.
+     */
+    if (
+        !matchesKeywords(
+            preferences,
+
+            job,
+        )
+    ) {
+        return false;
+    }
+
+
+    return true;
+}
+
+
+/*
+ * ========================================
+ * SPECIAL ANNOUNCEMENT OPT-IN
+ * ========================================
+ *
+ * Stage 8/9 will use this.
+ */
+
+export function wantsSpecialAnnouncements(
+    rawPreferences:
+        unknown,
+) {
+    return normalizePushPreferences(
+        rawPreferences,
+    )
+        .specialAnnouncements;
 }

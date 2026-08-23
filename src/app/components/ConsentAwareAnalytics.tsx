@@ -1,41 +1,82 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { GoogleAnalytics } from "@next/third-parties/google";
+
+import { Analytics } from "@vercel/analytics/react";
+
 import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
 
 import { CONSENT_UPDATED_EVENT, hasAnalyticsConsent } from "@/lib/consent";
 
 import { SITE } from "@/lib/site";
 
-import { GoogleAnalytics } from "@next/third-parties/google";
+function isLocalEnvironment() {
+  if (typeof window === "undefined") {
+    return true;
+  }
 
-import { Analytics } from "@vercel/analytics/react";
+  const hostname = window.location.hostname;
 
-import { useEffect, useState } from "react";
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
 
 export default function ConsentAwareAnalytics() {
   const [analyticsAllowed, setAnalyticsAllowed] = useState(false);
+
+  const [localEnvironment, setLocalEnvironment] = useState(true);
 
   useEffect(() => {
     function syncConsent() {
       setAnalyticsAllowed(hasAnalyticsConsent());
     }
 
+    setLocalEnvironment(isLocalEnvironment());
+
     syncConsent();
 
-    window.addEventListener(CONSENT_UPDATED_EVENT, syncConsent);
+    window.addEventListener(
+      CONSENT_UPDATED_EVENT,
+
+      syncConsent,
+    );
 
     return () => {
-      window.removeEventListener(CONSENT_UPDATED_EVENT, syncConsent);
+      window.removeEventListener(
+        CONSENT_UPDATED_EVENT,
+
+        syncConsent,
+      );
     };
   }, []);
 
   /*
-   * BASIC CONSENT MODE
+   * ========================================
+   * LOCAL DEVELOPMENT / LOCAL PRODUCTION
+   * ========================================
    *
-   * Google Analytics and Vercel Analytics
-   * are not loaded at all until the visitor
-   * explicitly allows analytics.
+   * `npm start` sets NODE_ENV=production,
+   * but localhost is still not the real
+   * deployed D•C Jobs website.
+   *
+   * Do not:
+   *
+   * - request Vercel Analytics locally
+   * - pollute GA with localhost sessions
+   * - attach analytics click listeners
    */
+
+  if (localEnvironment) {
+    return null;
+  }
+
+  /*
+   * ========================================
+   * CONSENT
+   * ========================================
+   */
+
   if (!analyticsAllowed) {
     return null;
   }
