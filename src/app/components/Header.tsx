@@ -40,7 +40,7 @@ export default async function Header() {
         {/* BRAND */}
         <Link
           href="/"
-          aria-label="Dev Champions Jobs home"
+          aria-label="D•C Jobs home"
           className="flex min-w-0 shrink items-center gap-1.5 sm:gap-3"
         >
           <Image

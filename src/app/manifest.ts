@@ -6,7 +6,7 @@ export default function manifest():
     MetadataRoute.Manifest {
     return {
         name:
-            "Dev Champions Jobs",
+            "D•C Jobs",
 
         short_name:
             "D•C Jobs",

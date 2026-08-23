@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
 
   description:
-    "Learn how Dev Champions Jobs collects, uses, protects and manages personal data and privacy rights.",
+    "Learn how D•C Jobs collects, uses, protects and manages personal data and privacy rights.",
 
   alternates: {
     canonical: `${SITE.url}/privacy`,
@@ -38,9 +38,9 @@ export default function PrivacyPage() {
             </h2>
 
             <p className="mt-4">
-              Dev Champions IT operates Dev Champions Jobs and acts as the data
-              controller for personal data processed through this platform where
-              we determine why and how that information is used.
+              Dev Champions IT operates D•C Jobs and acts as the data controller
+              for personal data processed through this platform where we
+              determine why and how that information is used.
             </p>
 
             <div className="mt-4 rounded-xl bg-slate-50 p-5">
@@ -85,9 +85,9 @@ export default function PrivacyPage() {
             <p className="mt-4">
               Where you choose to contact an employer through an email or
               telephone link, the information you subsequently provide to that
-              employer is shared directly with them. Dev Champions Jobs does not
-              currently operate an applicant CV or application-submission
-              database through those links.
+              employer is shared directly with them. D•C Jobs does not currently
+              operate an applicant CV or application-submission database through
+              those links.
             </p>
           </section>
 

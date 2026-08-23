@@ -2,6 +2,7 @@ import Hero from "@/app/components/Hero";
 import Jobs from "@/app/components/Jobs";
 import SeoDiscoverySection from "@/app/components/SeoDiscoverySection";
 
+import JobAlertsCard from "@/app/components/JobAlertsCard";
 import { addOrgAndUserData, Job, JobModel } from "@/models/Job";
 
 import { SITE } from "@/lib/site";
@@ -84,7 +85,7 @@ export async function generateMetadata({
 
       siteName: SITE.name,
 
-      title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+      title: "Tech Jobs in Nigeria & Africa | D•C Jobs",
 
       description: SITE.description,
     },
@@ -92,7 +93,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary",
 
-      title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+      title: "Tech Jobs in Nigeria & Africa | D•C Jobs",
 
       description: SITE.description,
     },
@@ -338,6 +339,7 @@ export default async function Home({ searchParams = {} }: HomeProps) {
   return (
     <>
       <Hero filters={filterParams} countries={countries} total={totalJobs} />
+      <JobAlertsCard />
 
       <Jobs
         header={hasSearch ? "Job results" : "Recent jobs"}

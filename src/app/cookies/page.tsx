@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Cookie Policy",
 
   description:
-    "Learn about cookies, browser storage and analytics technologies used by Dev Champions Jobs.",
+    "Learn about cookies, browser storage and analytics technologies used by D•C Jobs.",
 
   alternates: {
     canonical: `${SITE.url}/cookies`,
@@ -36,9 +36,8 @@ export default function CookiesPage() {
             <h2 className="text-2xl font-bold text-gray-950">What we use</h2>
 
             <p className="mt-4">
-              Dev Champions Jobs may use cookies, browser storage and similar
-              technologies for necessary site functionality and, where you
-              agree, analytics.
+              D•C Jobs may use cookies, browser storage and similar technologies
+              for necessary site functionality and, where you agree, analytics.
             </p>
           </section>
 

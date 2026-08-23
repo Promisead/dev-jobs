@@ -1,5 +1,5 @@
 export const SITE = {
-    name: "Dev Champions Jobs",
+    name: "D•C Jobs",
 
     shortName: "D•C Jobs",
 

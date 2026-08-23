@@ -53,7 +53,7 @@ export const SEO_LOCATIONS: Record<
             "Discover technology and digital career opportunities across Nigeria, from software engineering and data roles to AI, product, design and other technology-focused positions.",
 
         content: [
-            "Dev Champions Jobs brings technology opportunities across Nigeria into one focused career platform. Browse positions from companies hiring in major commercial and technology centres, as well as remote roles available to professionals based in Nigeria.",
+            "D•C Jobs brings technology opportunities across Nigeria into one focused career platform. Browse positions from companies hiring in major commercial and technology centres, as well as remote roles available to professionals based in Nigeria.",
 
             "Whether you are searching for software development, frontend, backend, full-stack, data, artificial intelligence, cloud, cybersecurity, product, design or related digital roles, this page gives you a continuously updated view of relevant opportunities across the country.",
         ],
@@ -90,9 +90,9 @@ export const SEO_LOCATIONS: Record<
             "Explore software, engineering, AI, data, product, design and other technology opportunities from employers hiring across Lagos.",
 
         content: [
-            "Lagos has one of the largest concentrations of technology companies, startups, digital businesses and professional services employers in Nigeria. Dev Champions Jobs helps professionals discover opportunities across Lagos without relying on broad, unstructured job searches.",
+            "Lagos has one of the largest concentrations of technology companies, startups, digital businesses and professional services employers in Nigeria. D•C Jobs helps professionals discover opportunities across Lagos without relying on broad, unstructured job searches.",
 
-            "Use this page to explore technology roles based in Lagos as well as hybrid opportunities connected to Lagos employers. New positions are surfaced from the same live job database used throughout the Dev Champions Jobs platform.",
+            "Use this page to explore technology roles based in Lagos as well as hybrid opportunities connected to Lagos employers. New positions are surfaced from the same live job database used throughout the D•C Jobs platform.",
         ],
 
         match: {
@@ -178,7 +178,7 @@ export const SEO_LOCATIONS: Record<
         content: [
             "Ibadan continues to support a growing community of technology professionals, digital businesses, educational organisations and companies adopting modern software and data-driven operations.",
 
-            "Dev Champions Jobs provides a focused place to discover opportunities specifically associated with Ibadan while also connecting professionals with wider career and technical resources throughout the Dev Champions ecosystem.",
+            "D•C Jobs provides a focused place to discover opportunities specifically associated with Ibadan while also connecting professionals with wider career and technical resources throughout the Dev Champions ecosystem.",
         ],
 
         match: {
@@ -215,7 +215,7 @@ export const SEO_LOCATIONS: Record<
         content: [
             "Ogun State includes important commercial, industrial and educational centres such as Abeokuta, Ota and Sagamu, creating opportunities across technology, digital operations, software, data and technical services.",
 
-            "This page aggregates jobs associated with Ogun State from the live Dev Champions Jobs database so professionals can discover relevant opportunities without depending entirely on general job search pages.",
+            "This page aggregates jobs associated with Ogun State from the live D•C Jobs database so professionals can discover relevant opportunities without depending entirely on general job search pages.",
         ],
 
         match: {

@@ -423,7 +423,7 @@ export default function InstallAppButton() {
                 {/* INTRODUCTION */}
                 <div className="mt-5">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#077998]">
-                    Dev Champions Jobs
+                    D•C Jobs
                   </p>
 
                   <h2

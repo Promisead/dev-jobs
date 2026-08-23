@@ -6,6 +6,10 @@ import {
 } from "@/lib/jobAuthorization";
 
 import {
+  notifyNewJobSubscribers,
+} from "@/lib/pushNotifications";
+
+import {
   descriptionToPlainText,
   normalizeJobDescription,
 } from "@/lib/jobDescription";
@@ -487,6 +491,25 @@ export async function saveJobAction(
 
     "URL_UPDATED"
   );
+  /*
+ * ========================================
+ * PUSH NOTIFICATION
+ * ========================================
+ *
+ * Only newly-created jobs trigger an alert.
+ *
+ * Editing an existing job must not spam
+ * subscribers with another notification.
+ */
+
+  if (!existingJob) {
+    await notifyNewJobSubscribers(
+      savedJob,
+    );
+  }
 
   return savedJob;
+
+
+
 }

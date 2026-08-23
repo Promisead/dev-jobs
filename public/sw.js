@@ -1,4 +1,4 @@
-const APP_NAME = "Dev Champions Jobs";
+const APP_NAME = "D•C Jobs";
 
 /*
  * ========================================

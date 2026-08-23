@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
 
   title: {
-    default: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+    default: "Tech Jobs in Nigeria & Africa | D•C Jobs",
 
-    template: "%s | Dev Champions Jobs",
+    template: "%s | D•C Jobs",
   },
 
   description: SITE.description,
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
 
     siteName: SITE.name,
 
-    title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+    title: "Tech Jobs in Nigeria & Africa | D•C Jobs",
 
     description: SITE.description,
   },
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
 
-    title: "Tech Jobs in Nigeria & Africa | Dev Champions Jobs",
+    title: "Tech Jobs in Nigeria & Africa | D•C Jobs",
 
     description: SITE.description,
   },

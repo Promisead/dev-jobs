@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms of Use",
 
-  description: "Terms governing access to and use of Dev Champions Jobs.",
+  description: "Terms governing access to and use of D•C Jobs.",
 
   alternates: {
     canonical: `${SITE.url}/terms`,
@@ -35,9 +35,9 @@ export default function TermsPage() {
             </h2>
 
             <p className="mt-4">
-              Dev Champions Jobs provides a technology job discovery and
-              publishing platform connecting job seekers with organisations
-              advertising opportunities.
+              D•C Jobs provides a technology job discovery and publishing
+              platform connecting job seekers with organisations advertising
+              opportunities.
             </p>
           </section>
 
@@ -70,9 +70,9 @@ export default function TermsPage() {
             </p>
 
             <p className="mt-4">
-              Dev Champions Jobs does not guarantee employment, interview
-              invitations, employer conduct, compensation or the continued
-              availability of a listing.
+              D•C Jobs does not guarantee employment, interview invitations,
+              employer conduct, compensation or the continued availability of a
+              listing.
             </p>
           </section>
 

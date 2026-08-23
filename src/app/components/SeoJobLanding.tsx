@@ -104,7 +104,7 @@ export default async function SeoJobLanding({
       <BreadcrumbJsonLd
         items={[
           {
-            name: "Dev Champions Jobs",
+            name: "D•C Jobs",
 
             url: SITE.url,
           },

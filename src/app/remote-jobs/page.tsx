@@ -99,7 +99,7 @@ export default async function RemoteJobsPage({
       title="Remote Tech Jobs in Nigeria & Across Africa"
       intro="Discover remote software, engineering, AI, data, product, design and digital opportunities that can be performed from Nigeria or elsewhere across Africa."
       content={[
-        "Remote work gives technology professionals access to opportunities beyond their immediate city while allowing companies to reach skilled candidates across a wider talent market. Dev Champions Jobs brings remote technology opportunities into a dedicated, searchable career page.",
+        "Remote work gives technology professionals access to opportunities beyond their immediate city while allowing companies to reach skilled candidates across a wider talent market. D•C Jobs brings remote technology opportunities into a dedicated, searchable career page.",
 
         "Browse remote software development, frontend, backend, full-stack, cloud, data, artificial intelligence, cybersecurity, product, design and other digital roles. Individual listings provide the employer's location, work mode and application information so you can evaluate each opportunity before applying.",
       ]}
