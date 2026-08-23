@@ -1,10 +1,10 @@
 import {
-    PushSubscriptionModel,
-} from "@/models/PushSubscription";
-
-import {
     SITE,
 } from "@/lib/site";
+
+import {
+    PushSubscriptionModel,
+} from "@/models/PushSubscription";
 
 import {
     getUser,
@@ -44,6 +44,7 @@ function isAllowedOrigin(
             "origin",
         );
 
+
     if (!origin) {
         return false;
     }
@@ -55,9 +56,6 @@ function isAllowedOrigin(
                 SITE.url,
             ).origin,
 
-            /*
-             * Useful for local production testing.
-             */
             "http://localhost:3000",
         ]);
 
@@ -113,8 +111,13 @@ function isValidSubscription(
 
 /*
  * ========================================
- * SUBSCRIBE
+ * SUBSCRIBE / RESYNCHRONIZE
  * ========================================
+ *
+ * Calling this repeatedly for the same
+ * browser does NOT create duplicates.
+ *
+ * The endpoint acts as the unique identity.
  */
 
 export async function POST(
@@ -172,10 +175,10 @@ export async function POST(
 
 
         /*
-         * Authentication is optional.
+         * Authentication remains optional.
          *
-         * This lets anonymous job seekers
-         * receive alerts too.
+         * Anonymous visitors can receive
+         * job alerts.
          */
         let userId:
             string | null =
@@ -188,10 +191,15 @@ export async function POST(
             } =
                 await getUser();
 
+
             userId =
                 user?.id ??
                 null;
         } catch {
+            /*
+             * An expired/missing WorkOS session
+             * must never prevent Web Push.
+             */
             userId =
                 null;
         }
@@ -226,6 +234,43 @@ export async function POST(
                     enabled:
                         true,
                 },
+
+                /*
+                 * Only inserted for brand-new
+                 * subscription records.
+                 *
+                 * Existing preferences are preserved.
+                 */
+                $setOnInsert: {
+                    preferences: {
+                        newJobs:
+                            true,
+
+                        specialAnnouncements:
+                            true,
+
+                        workModes:
+                            [],
+
+                        jobTypes:
+                            [],
+
+                        countries:
+                            [],
+
+                        states:
+                            [],
+
+                        cities:
+                            [],
+
+                        keywords:
+                            [],
+
+                        minSalary:
+                            null,
+                    },
+                },
             },
 
             {
@@ -236,6 +281,9 @@ export async function POST(
                     true,
 
                 setDefaultsOnInsert:
+                    true,
+
+                runValidators:
                     true,
             },
         );

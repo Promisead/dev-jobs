@@ -26,6 +26,8 @@ import {
   revalidateJobSeoPaths,
 } from "@/lib/revalidateJobSeo";
 
+
+
 import {
   Job,
   JobModel,

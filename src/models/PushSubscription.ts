@@ -5,15 +5,41 @@ import {
 } from "mongoose";
 
 
+export type PushPreferences = {
+    newJobs: boolean;
+
+    specialAnnouncements: boolean;
+
+    workModes: string[];
+
+    jobTypes: string[];
+
+    countries: string[];
+
+    states: string[];
+
+    cities: string[];
+
+    keywords: string[];
+
+    minSalary:
+    number | null;
+};
+
+
 export type StoredPushSubscription = {
-    endpoint: string;
+    endpoint:
+    string;
 
     expirationTime?:
     number | null;
 
     keys: {
-        p256dh: string;
-        auth: string;
+        p256dh:
+        string;
+
+        auth:
+        string;
     };
 
     userId?:
@@ -22,12 +48,98 @@ export type StoredPushSubscription = {
     enabled:
     boolean;
 
+    preferences:
+    PushPreferences;
+
     createdAt?:
     Date;
 
     updatedAt?:
     Date;
 };
+
+
+const PushPreferencesSchema =
+    new Schema(
+        {
+            newJobs: {
+                type:
+                    Boolean,
+
+                default:
+                    true,
+            },
+
+            specialAnnouncements: {
+                type:
+                    Boolean,
+
+                default:
+                    true,
+            },
+
+            workModes: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            jobTypes: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            countries: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            states: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            cities: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            keywords: {
+                type:
+                    [String],
+
+                default:
+                    [],
+            },
+
+            minSalary: {
+                type:
+                    Number,
+
+                default:
+                    null,
+            },
+        },
+
+        {
+            _id:
+                false,
+        },
+    );
 
 
 const PushSubscriptionSchema =
@@ -73,15 +185,6 @@ const PushSubscriptionSchema =
                 },
             },
 
-            /*
-             * Optional.
-             *
-             * Anonymous job seekers can still
-             * subscribe.
-             *
-             * Logged-in users can additionally
-             * be associated with their WorkOS ID.
-             */
             userId: {
                 type:
                     String,
@@ -103,6 +206,41 @@ const PushSubscriptionSchema =
                 index:
                     true,
             },
+
+            preferences: {
+                type:
+                    PushPreferencesSchema,
+
+                default:
+                    () => ({
+                        newJobs:
+                            true,
+
+                        specialAnnouncements:
+                            true,
+
+                        workModes:
+                            [],
+
+                        jobTypes:
+                            [],
+
+                        countries:
+                            [],
+
+                        states:
+                            [],
+
+                        cities:
+                            [],
+
+                        keywords:
+                            [],
+
+                        minSalary:
+                            null,
+                    }),
+            },
         },
 
         {
@@ -110,6 +248,24 @@ const PushSubscriptionSchema =
                 true,
         },
     );
+
+
+PushSubscriptionSchema.index({
+    enabled:
+        1,
+
+    "preferences.newJobs":
+        1,
+});
+
+
+PushSubscriptionSchema.index({
+    enabled:
+        1,
+
+    "preferences.specialAnnouncements":
+        1,
+});
 
 
 export const PushSubscriptionModel =

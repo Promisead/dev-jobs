@@ -40,14 +40,45 @@ type PushPayload = {
 };
 
 
+type LeanPushSubscription = {
+    endpoint:
+    string;
+
+    keys: {
+        p256dh:
+        string;
+
+        auth:
+        string;
+    };
+};
+
+
+type DeliverySummary = {
+    attempted:
+    number;
+
+    delivered:
+    number;
+
+    failed:
+    number;
+
+    removed:
+    number;
+};
+
+
 function configureWebPush() {
     const publicKey =
         process.env
             .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
+
     const privateKey =
         process.env
             .VAPID_PRIVATE_KEY;
+
 
     const subject =
         process.env
@@ -65,7 +96,9 @@ function configureWebPush() {
 
     webpush.setVapidDetails(
         subject,
+
         publicKey,
+
         privateKey,
     );
 
@@ -81,7 +114,8 @@ function getPushStatusCode(
     if (
         typeof error ===
         "object" &&
-        error !== null &&
+        error !==
+        null &&
         "statusCode" in
         error
     ) {
@@ -92,7 +126,8 @@ function getPushStatusCode(
                         statusCode?:
                         unknown;
                     }
-                ).statusCode,
+                )
+                    .statusCode,
             );
 
 
@@ -111,7 +146,8 @@ function getPushStatusCode(
 export async function sendPushToSubscribers(
     payload:
         PushPayload,
-) {
+):
+    Promise<DeliverySummary> {
     if (
         !configureWebPush()
     ) {
@@ -119,7 +155,20 @@ export async function sendPushToSubscribers(
             "Web Push skipped: VAPID keys are not configured.",
         );
 
-        return;
+
+        return {
+            attempted:
+                0,
+
+            delivered:
+                0,
+
+            failed:
+                0,
+
+            removed:
+                0,
+        };
     }
 
 
@@ -130,26 +179,55 @@ export async function sendPushToSubscribers(
         );
 
 
-        const subscriptions =
+        /*
+         * STAGE 6:
+         *
+         * NO PREFERENCE FILTERING YET.
+         *
+         * Every enabled subscription receives
+         * new-job notifications.
+         */
+        const rawSubscriptions =
             await PushSubscriptionModel.find({
                 enabled:
                     true,
             })
+                .select(
+                    "endpoint keys",
+                )
                 .lean()
                 .exec();
 
 
-        /*
-         * Small batches avoid blasting every
-         * subscription concurrently once the
-         * platform grows.
-         */
+        const subscriptions =
+            rawSubscriptions as unknown as
+            LeanPushSubscription[];
+
+
+        console.info(
+            `Web Push: ${subscriptions.length} enabled subscription(s) found.`,
+        );
+
+
         const BATCH_SIZE =
             25;
 
 
+        let delivered =
+            0;
+
+
+        let failed =
+            0;
+
+
+        let removed =
+            0;
+
+
         for (
-            let index = 0;
+            let index =
+                0;
             index <
             subscriptions.length;
             index +=
@@ -158,105 +236,190 @@ export async function sendPushToSubscribers(
             const batch =
                 subscriptions.slice(
                     index,
+
                     index +
                     BATCH_SIZE,
                 );
 
 
-            await Promise.allSettled(
-                batch.map(
-                    async (
-                        subscription,
-                    ) => {
-                        try {
-                            await webpush.sendNotification(
-                                {
-                                    endpoint:
-                                        subscription.endpoint,
-
-                                    keys: {
-                                        p256dh:
+            const results =
+                await Promise.all(
+                    batch.map(
+                        async (
+                            subscription,
+                        ) => {
+                            try {
+                                await webpush.sendNotification(
+                                    {
+                                        endpoint:
                                             subscription
-                                                .keys
-                                                .p256dh,
+                                                .endpoint,
 
-                                        auth:
-                                            subscription
-                                                .keys
-                                                .auth,
+                                        keys: {
+                                            p256dh:
+                                                subscription
+                                                    .keys
+                                                    .p256dh,
+
+                                            auth:
+                                                subscription
+                                                    .keys
+                                                    .auth,
+                                        },
                                     },
-                                },
 
-                                JSON.stringify(
-                                    payload,
-                                ),
+                                    JSON.stringify(
+                                        payload,
+                                    ),
 
-                                {
-                                    /*
-                                     * A job notification that
-                                     * arrives a day later is
-                                     * normally still useful.
-                                     */
-                                    TTL:
-                                        60 *
-                                        60 *
-                                        24,
-                                },
-                            );
-                        } catch (
-                        error
-                        ) {
-                            const statusCode =
-                                getPushStatusCode(
+                                    {
+                                        TTL:
+                                            60 *
+                                            60 *
+                                            24,
+                                    },
+                                );
+
+
+                                return {
+                                    status:
+                                        "delivered" as const,
+                                };
+                            } catch (
+                            error
+                            ) {
+                                const statusCode =
+                                    getPushStatusCode(
+                                        error,
+                                    );
+
+
+                                /*
+                                 * Browser subscription is gone.
+                                 */
+                                if (
+                                    statusCode ===
+                                    404 ||
+                                    statusCode ===
+                                    410
+                                ) {
+                                    await PushSubscriptionModel.deleteOne({
+                                        endpoint:
+                                            subscription
+                                                .endpoint,
+                                    });
+
+
+                                    return {
+                                        status:
+                                            "removed" as const,
+                                    };
+                                }
+
+
+                                console.error(
+                                    "Web Push delivery failed:",
+                                    statusCode ||
+                                    "unknown",
+
                                     error,
                                 );
 
 
-                            /*
-                             * 404/410 means the browser's
-                             * subscription is dead.
-                             *
-                             * Remove it automatically.
-                             */
-                            if (
-                                statusCode ===
-                                404 ||
-                                statusCode ===
-                                410
-                            ) {
-                                await PushSubscriptionModel.deleteOne({
-                                    endpoint:
-                                        subscription.endpoint,
-                                });
-
-                                return;
+                                return {
+                                    status:
+                                        "failed" as const,
+                                };
                             }
+                        },
+                    ),
+                );
 
 
-                            console.error(
-                                "Web Push delivery failed:",
-                                statusCode ||
-                                "unknown",
-                            );
-                        }
-                    },
-                ),
-            );
+            delivered +=
+                results.filter(
+                    (
+                        result,
+                    ) =>
+                        result.status ===
+                        "delivered",
+                ).length;
+
+
+            failed +=
+                results.filter(
+                    (
+                        result,
+                    ) =>
+                        result.status ===
+                        "failed",
+                ).length;
+
+
+            removed +=
+                results.filter(
+                    (
+                        result,
+                    ) =>
+                        result.status ===
+                        "removed",
+                ).length;
         }
+
+
+        const summary = {
+            attempted:
+                subscriptions.length,
+
+            delivered,
+
+            failed,
+
+            removed,
+        };
+
+
+        console.info(
+            "Web Push delivery summary:",
+            summary,
+        );
+
+
+        return summary;
     } catch (
     error
     ) {
         /*
-         * Push failure must NEVER undo
-         * successful job publishing.
+         * Push must never undo job publishing.
          */
         console.error(
-            "Unable to send job notifications:",
+            "Unable to send push notifications:",
             error,
         );
+
+
+        return {
+            attempted:
+                0,
+
+            delivered:
+                0,
+
+            failed:
+                0,
+
+            removed:
+                0,
+        };
     }
 }
 
+
+/*
+ * ========================================
+ * NEW JOB
+ * ========================================
+ */
 
 export async function notifyNewJobSubscribers(
     job:
@@ -268,7 +431,9 @@ export async function notifyNewJobSubscribers(
             ? "Remote"
             : [
                 job.city,
+
                 job.state,
+
                 job.country,
             ]
                 .filter(
@@ -284,7 +449,7 @@ export async function notifyNewJobSubscribers(
         "New employer";
 
 
-    await sendPushToSubscribers({
+    return sendPushToSubscribers({
         title:
             `New job: ${job.title}`,
 
@@ -302,6 +467,7 @@ export async function notifyNewJobSubscribers(
             `job-${job._id}`,
 
         icon:
+            job.jobIcon ||
             "/icons/icon-192.png",
 
         badge:
