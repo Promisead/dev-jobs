@@ -156,7 +156,16 @@ export default function Footer() {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#5A1C4B]/15 bg-white/80 shadow-sm dark:border-[#409FB6]/20 dark:bg-slate-900/70">
                 <Image
                   src="/images/logo/logo_web_white.png"
-                  alt="Tek Core Logo"
+                  alt="DC logo"
+                  width={40}
+                  height={40}
+                  className="block h-10 w-10 object-contain dark:hidden"
+                  priority
+                  unoptimized
+                />
+                <Image
+                  src="/images/logo/logo_web_white.png"
+                  alt="Logo"
                   width={40}
                   height={40}
                   className="hidden h-10 w-10 object-contain dark:block"
