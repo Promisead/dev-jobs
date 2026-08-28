@@ -43,17 +43,7 @@ export default async function Header() {
           aria-label="D•C Jobs home"
           className="flex min-w-0 shrink items-center gap-1.5 sm:gap-3"
         >
-          <Image
-            src="/images/logo/logo_web.png"
-            alt="Dev Champions logo"
-            width={48}
-            height={48}
-            priority
-            unoptimized
-            className="h-9 w-9 shrink-0 object-contain sm:h-12 sm:w-12"
-          />
-
-          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+          <div className="flex  min-w-0 items-center gap-1 sm:gap-2">
             <span className="whitespace-nowrap text-[20px] font-bold tracking-tight text-[#077998] sm:text-3xl">
               D•C
             </span>

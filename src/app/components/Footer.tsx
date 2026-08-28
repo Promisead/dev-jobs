@@ -152,23 +152,27 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-8 md:ml-2 lg:ml-2">
           {/* BRAND */}
           <div className="sm:col-span-2 lg:col-span-2">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3"
-              aria-label="DC Jobs home"
-            >
-              <Image
-                src="/images/logo/logo_web_white.png"
-                alt="Dev Champions logo"
-                width={52}
-                height={52}
-                className="h-11 w-11 object-contain sm:h-12 sm:w-12 md:ml-2 lg:ml-2"
-                unoptimized
-              />
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#5A1C4B]/15 bg-white/80 shadow-sm dark:border-[#409FB6]/20 dark:bg-slate-900/70">
+                <Image
+                  src="/images/logo/logo_web_white.png"
+                  alt="Tek Core Logo"
+                  width={40}
+                  height={40}
+                  className="hidden h-10 w-10 object-contain dark:block"
+                  priority
+                  unoptimized
+                />
+              </div>
 
-              <span className="text-2xl font-semibold tracking-tight text-white">
-                D•C Jobs
-              </span>
+              <div>
+                <h2 className="text-xl font-bold text-[#5A1C4B] dark:text-[#7fd2eb]">
+                  D•C Jobs
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Tech Jobs Partner
+                </p>
+              </div>
             </Link>
 
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/65">
