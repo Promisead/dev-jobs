@@ -141,8 +141,28 @@ export async function POST(
                 string,
                 unknown
             > = {
+            /*
+             * User has returned.
+             */
             lastSeenAt:
                 now,
+
+            /*
+             * Start a completely new inactivity
+             * journey from this visit.
+             */
+            winBackStage:
+                0,
+
+            lastWinBackAt:
+                null,
+
+            /*
+             * Any stale cron lock should be removed
+             * when the user becomes active.
+             */
+            winBackLockUntil:
+                null,
         };
 
 

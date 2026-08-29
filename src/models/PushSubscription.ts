@@ -38,6 +38,12 @@ export type PushPreferences = {
 };
 
 
+export type WinBackStage =
+    0 |
+    1 |
+    2;
+
+
 export type StoredPushSubscription = {
     endpoint:
     string;
@@ -62,12 +68,6 @@ export type StoredPushSubscription = {
     preferences:
     PushPreferences;
 
-    /*
-     * ========================================
-     * ENGAGEMENT
-     * ========================================
-     */
-
     lastSeenAt?:
     Date | null;
 
@@ -79,6 +79,29 @@ export type StoredPushSubscription = {
 
     lastPushId?:
     string | null;
+
+    /*
+     * ========================================
+     * WIN-BACK JOURNEY
+     * ========================================
+     *
+     * 0 = no reminder sent
+     * 1 = first reminder sent
+     * 2 = second reminder sent
+     */
+
+    winBackStage?:
+    WinBackStage;
+
+    lastWinBackAt?:
+    Date | null;
+
+    /*
+     * Prevent concurrent cron invocations from
+     * delivering the same reminder twice.
+     */
+    winBackLockUntil?:
+    Date | null;
 
     createdAt?:
     Date;
@@ -107,12 +130,6 @@ const PushPreferencesSchema =
                     true,
             },
 
-            /*
-             * Used later by the win-back flow.
-             *
-             * Users can disable these reminders
-             * without disabling normal job alerts.
-             */
             careerReminders: {
                 type:
                     Boolean,
@@ -288,16 +305,10 @@ const PushSubscriptionSchema =
                     }),
             },
 
-
             /*
              * ========================================
              * ACTIVITY
              * ========================================
-             *
-             * These are intentionally minimal.
-             *
-             * We do not store fingerprints,
-             * device IDs or unnecessary browser data.
              */
 
             lastSeenAt: {
@@ -330,6 +341,45 @@ const PushSubscriptionSchema =
             lastPushId: {
                 type:
                     String,
+
+                default:
+                    null,
+            },
+
+            /*
+             * ========================================
+             * WIN-BACK
+             * ========================================
+             */
+
+            winBackStage: {
+                type:
+                    Number,
+
+                enum: [
+                    0,
+                    1,
+                    2,
+                ],
+
+                default:
+                    0,
+
+                index:
+                    true,
+            },
+
+            lastWinBackAt: {
+                type:
+                    Date,
+
+                default:
+                    null,
+            },
+
+            winBackLockUntil: {
+                type:
+                    Date,
 
                 default:
                     null,
@@ -368,7 +418,13 @@ PushSubscriptionSchema.index({
     "preferences.careerReminders":
         1,
 
+    winBackStage:
+        1,
+
     lastSeenAt:
+        1,
+
+    lastWinBackAt:
         1,
 });
 

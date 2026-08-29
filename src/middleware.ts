@@ -9,14 +9,14 @@ export default authkitMiddleware();
 export const config = {
   matcher: [
     /*
-     * AuthKit runs for normal application
-     * and API routes.
+     * AuthKit continues protecting normal
+     * application/API routes.
      *
-     * PWA/service-worker/static files must
-     * never pass through authentication
-     * middleware.
+     * /api/cron/* uses CRON_SECRET instead.
+     *
+     * PWA/static files must also bypass AuthKit.
      */
 
-    "/((?!_next/static|_next/image|favicon.ico|favicon.jpg|sw.js|manifest.webmanifest|icons/|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!api/cron/|_next/static|_next/image|favicon.ico|favicon.jpg|sw.js|manifest.webmanifest|icons/|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
