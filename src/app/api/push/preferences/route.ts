@@ -1,6 +1,3 @@
-import {
-    SITE,
-} from "@/lib/site";
 
 import {
     PushSubscriptionModel,
@@ -13,6 +10,9 @@ import {
     NextResponse,
 } from "next/server";
 
+import {
+    isAllowedAppOrigin,
+} from "@/lib/requestOrigin";
 
 const ALLOWED_WORK_MODES =
     new Set([
@@ -36,35 +36,7 @@ type PushPreferencesLeanDocument = {
 };
 
 
-function isAllowedOrigin(
-    request:
-        NextRequest,
-) {
-    const origin =
-        request.headers.get(
-            "origin",
-        );
 
-
-    if (!origin) {
-        return false;
-    }
-
-
-    const allowedOrigins =
-        new Set([
-            new URL(
-                SITE.url,
-            ).origin,
-
-            "http://localhost:3000",
-        ]);
-
-
-    return allowedOrigins.has(
-        origin,
-    );
-}
 
 
 function cleanStrings(
@@ -214,7 +186,7 @@ export async function POST(
 ) {
     try {
         if (
-            !isAllowedOrigin(
+            !isAllowedAppOrigin(
                 request,
             )
         ) {
@@ -345,7 +317,7 @@ export async function PATCH(
 ) {
     try {
         if (
-            !isAllowedOrigin(
+            !isAllowedAppOrigin(
                 request,
             )
         ) {
