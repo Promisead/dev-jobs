@@ -6,7 +6,7 @@ import PwaRegistrar from "@/app/components/PwaRegistrar";
 
 import ConsentAwareAnalytics from "@/app/components/ConsentAwareAnalytics";
 import ConsentManager from "@/app/components/ConsentManager";
-
+import NotificationOnboardingNudge from "@/app/components/NotificationOnboardingNudge";
 import type { Metadata, Viewport } from "next";
 
 import "@fontsource/caladea/400.css";
@@ -199,6 +199,8 @@ export default function RootLayout({
         <ConsentAwareAnalytics />
 
         <ConsentManager />
+
+        <NotificationOnboardingNudge />
 
         <script
           type="application/ld+json"

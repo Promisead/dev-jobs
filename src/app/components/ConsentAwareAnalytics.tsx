@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/react";
 
 import EcosystemAnalytics from "@/app/components/EcosystemAnalytics";
 
+import PushClickAnalytics from "@/app/components/PushClickAnalytics";
+
 import { CONSENT_UPDATED_EVENT, hasAnalyticsConsent } from "@/lib/consent";
 
 import { SITE } from "@/lib/site";
@@ -36,46 +38,16 @@ export default function ConsentAwareAnalytics() {
 
     syncConsent();
 
-    window.addEventListener(
-      CONSENT_UPDATED_EVENT,
-
-      syncConsent,
-    );
+    window.addEventListener(CONSENT_UPDATED_EVENT, syncConsent);
 
     return () => {
-      window.removeEventListener(
-        CONSENT_UPDATED_EVENT,
-
-        syncConsent,
-      );
+      window.removeEventListener(CONSENT_UPDATED_EVENT, syncConsent);
     };
   }, []);
-
-  /*
-   * ========================================
-   * LOCAL DEVELOPMENT / LOCAL PRODUCTION
-   * ========================================
-   *
-   * `npm start` sets NODE_ENV=production,
-   * but localhost is still not the real
-   * deployed D•C Jobs website.
-   *
-   * Do not:
-   *
-   * - request Vercel Analytics locally
-   * - pollute GA with localhost sessions
-   * - attach analytics click listeners
-   */
 
   if (localEnvironment) {
     return null;
   }
-
-  /*
-   * ========================================
-   * CONSENT
-   * ========================================
-   */
 
   if (!analyticsAllowed) {
     return null;
@@ -88,6 +60,8 @@ export default function ConsentAwareAnalytics() {
       <Analytics />
 
       {SITE.gaId && <GoogleAnalytics gaId={SITE.gaId} />}
+
+      <PushClickAnalytics />
     </>
   );
 }

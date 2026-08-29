@@ -1,49 +1,22 @@
-// import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
-
-// export default authkitMiddleware();
-
-// // Match against pages that require authentication
-// // Leave this out if you want authentication on every page in your application
-// export const config = {
-//   matcher: [
-//     '/',
-//     '/new-listing',
-//     '/new-listing/:orgId*',
-//     '/new-company',
-//     '/jobs/:orgId*',
-//     '/jobs/edit/:jobId*',
-//     '/show/:jobId*',
-//   ]
-// };
-
-// import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
-
-// export default authkitMiddleware();
-
-// export const config = {
-//   matcher: [
-//     /*
-//      * Run AuthKit on application routes while skipping
-//      * Next.js internal assets and common static images.
-//      */
-//     '/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
-//   ],
-// };
-
-
 import {
   authkitMiddleware,
 } from "@workos-inc/authkit-nextjs";
 
+
 export default authkitMiddleware();
+
 
 export const config = {
   matcher: [
     /*
-     * Run AuthKit on application routes
-     * while excluding Next.js internals
-     * and static image assets.
+     * AuthKit runs for normal application
+     * and API routes.
+     *
+     * PWA/service-worker/static files must
+     * never pass through authentication
+     * middleware.
      */
-    "/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+
+    "/((?!_next/static|_next/image|favicon.ico|favicon.jpg|sw.js|manifest.webmanifest|icons/|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
