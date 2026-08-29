@@ -2,11 +2,17 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 
 import { SITE } from "@/lib/site";
+
 import PwaRegistrar from "@/app/components/PwaRegistrar";
 
+import PushActivityTracker from "@/app/components/PushActivityTracker";
+
 import ConsentAwareAnalytics from "@/app/components/ConsentAwareAnalytics";
+
 import ConsentManager from "@/app/components/ConsentManager";
+
 import NotificationOnboardingNudge from "@/app/components/NotificationOnboardingNudge";
+
 import type { Metadata, Viewport } from "next";
 
 import "@fontsource/caladea/400.css";
@@ -195,6 +201,8 @@ export default function RootLayout({
     <html lang={SITE.language}>
       <body>
         <PwaRegistrar />
+
+        <PushActivityTracker />
 
         <ConsentAwareAnalytics />
 

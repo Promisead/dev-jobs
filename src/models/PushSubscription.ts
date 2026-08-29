@@ -6,21 +6,32 @@ import {
 
 
 export type PushPreferences = {
-    newJobs: boolean;
+    newJobs:
+    boolean;
 
-    specialAnnouncements: boolean;
+    specialAnnouncements:
+    boolean;
 
-    workModes: string[];
+    careerReminders:
+    boolean;
 
-    jobTypes: string[];
+    workModes:
+    string[];
 
-    countries: string[];
+    jobTypes:
+    string[];
 
-    states: string[];
+    countries:
+    string[];
 
-    cities: string[];
+    states:
+    string[];
 
-    keywords: string[];
+    cities:
+    string[];
+
+    keywords:
+    string[];
 
     minSalary:
     number | null;
@@ -51,6 +62,24 @@ export type StoredPushSubscription = {
     preferences:
     PushPreferences;
 
+    /*
+     * ========================================
+     * ENGAGEMENT
+     * ========================================
+     */
+
+    lastSeenAt?:
+    Date | null;
+
+    lastPushClickAt?:
+    Date | null;
+
+    lastPushCampaign?:
+    string | null;
+
+    lastPushId?:
+    string | null;
+
     createdAt?:
     Date;
 
@@ -71,6 +100,20 @@ const PushPreferencesSchema =
             },
 
             specialAnnouncements: {
+                type:
+                    Boolean,
+
+                default:
+                    true,
+            },
+
+            /*
+             * Used later by the win-back flow.
+             *
+             * Users can disable these reminders
+             * without disabling normal job alerts.
+             */
+            careerReminders: {
                 type:
                     Boolean,
 
@@ -219,6 +262,9 @@ const PushSubscriptionSchema =
                         specialAnnouncements:
                             true,
 
+                        careerReminders:
+                            true,
+
                         workModes:
                             [],
 
@@ -240,6 +286,53 @@ const PushSubscriptionSchema =
                         minSalary:
                             null,
                     }),
+            },
+
+
+            /*
+             * ========================================
+             * ACTIVITY
+             * ========================================
+             *
+             * These are intentionally minimal.
+             *
+             * We do not store fingerprints,
+             * device IDs or unnecessary browser data.
+             */
+
+            lastSeenAt: {
+                type:
+                    Date,
+
+                default:
+                    null,
+
+                index:
+                    true,
+            },
+
+            lastPushClickAt: {
+                type:
+                    Date,
+
+                default:
+                    null,
+            },
+
+            lastPushCampaign: {
+                type:
+                    String,
+
+                default:
+                    null,
+            },
+
+            lastPushId: {
+                type:
+                    String,
+
+                default:
+                    null,
             },
         },
 
@@ -264,6 +357,18 @@ PushSubscriptionSchema.index({
         1,
 
     "preferences.specialAnnouncements":
+        1,
+});
+
+
+PushSubscriptionSchema.index({
+    enabled:
+        1,
+
+    "preferences.careerReminders":
+        1,
+
+    lastSeenAt:
         1,
 });
 

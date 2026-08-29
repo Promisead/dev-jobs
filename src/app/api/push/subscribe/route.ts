@@ -1,10 +1,10 @@
 import {
-    SITE,
-} from "@/lib/site";
-
-import {
     PushSubscriptionModel,
 } from "@/models/PushSubscription";
+
+import {
+    isAllowedAppOrigin,
+} from "@/lib/requestOrigin";
 
 import {
     getUser,
@@ -33,37 +33,6 @@ type SubscriptionPayload = {
         unknown;
     };
 };
-
-
-function isAllowedOrigin(
-    request:
-        NextRequest,
-) {
-    const origin =
-        request.headers.get(
-            "origin",
-        );
-
-
-    if (!origin) {
-        return false;
-    }
-
-
-    const allowedOrigins =
-        new Set([
-            new URL(
-                SITE.url,
-            ).origin,
-
-            "http://localhost:3000",
-        ]);
-
-
-    return allowedOrigins.has(
-        origin,
-    );
-}
 
 
 function isValidSubscription(
@@ -109,24 +78,13 @@ function isValidSubscription(
 }
 
 
-/*
- * ========================================
- * SUBSCRIBE / RESYNCHRONIZE
- * ========================================
- *
- * Calling this repeatedly for the same
- * browser does NOT create duplicates.
- *
- * The endpoint acts as the unique identity.
- */
-
 export async function POST(
     request:
         NextRequest,
 ) {
     try {
         if (
-            !isAllowedOrigin(
+            !isAllowedAppOrigin(
                 request,
             )
         ) {
@@ -174,12 +132,6 @@ export async function POST(
         );
 
 
-        /*
-         * Authentication remains optional.
-         *
-         * Anonymous visitors can receive
-         * job alerts.
-         */
         let userId:
             string | null =
             null;
@@ -197,12 +149,16 @@ export async function POST(
                 null;
         } catch {
             /*
-             * An expired/missing WorkOS session
-             * must never prevent Web Push.
+             * Anonymous visitors remain allowed
+             * to receive Push notifications.
              */
             userId =
                 null;
         }
+
+
+        const now =
+            new Date();
 
 
         await PushSubscriptionModel.findOneAndUpdate(
@@ -233,20 +189,25 @@ export async function POST(
 
                     enabled:
                         true,
+
+                    /*
+                     * Subscription creation/resync occurs
+                     * while the visitor is actively using
+                     * D•C Jobs.
+                     */
+                    lastSeenAt:
+                        now,
                 },
 
-                /*
-                 * Only inserted for brand-new
-                 * subscription records.
-                 *
-                 * Existing preferences are preserved.
-                 */
                 $setOnInsert: {
                     preferences: {
                         newJobs:
                             true,
 
                         specialAnnouncements:
+                            true,
+
+                        careerReminders:
                             true,
 
                         workModes:
@@ -270,6 +231,15 @@ export async function POST(
                         minSalary:
                             null,
                     },
+
+                    lastPushClickAt:
+                        null,
+
+                    lastPushCampaign:
+                        null,
+
+                    lastPushId:
+                        null,
                 },
             },
 
@@ -317,19 +287,13 @@ export async function POST(
 }
 
 
-/*
- * ========================================
- * UNSUBSCRIBE
- * ========================================
- */
-
 export async function DELETE(
     request:
         NextRequest,
 ) {
     try {
         if (
-            !isAllowedOrigin(
+            !isAllowedAppOrigin(
                 request,
             )
         ) {

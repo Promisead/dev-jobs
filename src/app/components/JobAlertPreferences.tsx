@@ -7,6 +7,8 @@ export type AlertPreferences = {
 
   specialAnnouncements: boolean;
 
+  careerReminders: boolean;
+
   workModes: string[];
 
   jobTypes: string[];
@@ -26,6 +28,8 @@ export const DEFAULT_ALERT_PREFERENCES: AlertPreferences = {
   newJobs: true,
 
   specialAnnouncements: true,
+
+  careerReminders: true,
 
   workModes: [],
 
@@ -86,21 +90,56 @@ function CheckboxOption({
   onChange: () => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-[#077998]/40">
+    <label
+      className="
+        flex
+        cursor-pointer
+        items-start
+        gap-3
+        rounded-xl
+        border
+        border-gray-200
+        bg-white
+        p-3
+        transition
+
+        hover:border-[#077998]/40
+      "
+    >
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="mt-1 h-4 w-4 accent-[#077998]"
+        className="
+          mt-1
+          h-4
+          w-4
+          accent-[#077998]
+        "
       />
 
       <span>
-        <span className="block text-sm font-semibold text-gray-900">
+        <span
+          className="
+            block
+            text-sm
+            font-semibold
+            text-gray-900
+          "
+        >
           {label}
         </span>
 
         {description && (
-          <span className="mt-0.5 block text-xs leading-5 text-gray-500">
+          <span
+            className="
+              mt-0.5
+              block
+              text-xs
+              leading-5
+              text-gray-500
+            "
+          >
             {description}
           </span>
         )}
@@ -183,6 +222,8 @@ export default function JobAlertPreferences({
 
             specialAnnouncements: preferences.specialAnnouncements,
 
+            careerReminders: preferences.careerReminders,
+
             workModes: preferences.workModes,
 
             jobTypes: preferences.jobTypes,
@@ -220,29 +261,79 @@ export default function JobAlertPreferences({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/45 backdrop-blur-sm sm:items-center sm:p-5"
+      className="
+        fixed
+        inset-0
+        z-[10000]
+        flex
+        items-end
+        justify-center
+        bg-black/45
+        backdrop-blur-sm
+
+        sm:items-center
+        sm:p-5
+      "
       onMouseDown={onClose}
     >
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="job-alert-preferences-title"
-        className="max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-[#fafafa] shadow-2xl sm:max-w-2xl sm:rounded-3xl"
+        className="
+          max-h-[92dvh]
+          w-full
+          overflow-y-auto
+          rounded-t-3xl
+          bg-[#fafafa]
+          shadow-2xl
+
+          sm:max-w-2xl
+          sm:rounded-3xl
+        "
         onMouseDown={(event) => {
           event.stopPropagation();
         }}
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-200 bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+        <header
+          className="
+            sticky
+            top-0
+            z-10
+            flex
+            items-start
+            justify-between
+            border-b
+            border-gray-200
+            bg-white/95
+            px-5
+            py-4
+            backdrop-blur
+
+            sm:px-7
+          "
+        >
           <div>
             <h2
               id="job-alert-preferences-title"
-              className="text-xl font-bold text-gray-950"
+              className="
+                text-xl
+                font-bold
+                text-gray-950
+              "
             >
               Personalize your job alerts
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Choose which opportunities should matter most to you.
+            <p
+              className="
+                mt-1
+                text-sm
+                text-gray-500
+              "
+            >
+              Choose which opportunities and reminders should matter most to
+              you.
             </p>
           </div>
 
@@ -250,19 +341,58 @@ export default function JobAlertPreferences({
             type="button"
             aria-label="Close preferences"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-xl text-gray-500 transition hover:bg-gray-100"
+            className="
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-gray-200
+              bg-white
+              text-xl
+              text-gray-500
+              transition
+
+              hover:bg-gray-100
+            "
           >
             ×
           </button>
         </header>
 
-        <div className="space-y-7 px-5 py-6 sm:px-7">
+        <div
+          className="
+            space-y-7
+            px-5
+            py-6
+
+            sm:px-7
+          "
+        >
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-[#077998]">
+            <h3
+              className="
+                text-sm
+                font-bold
+                uppercase
+                tracking-[0.14em]
+                text-[#077998]
+              "
+            >
               Notifications
             </h3>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div
+              className="
+                mt-3
+                grid
+                gap-3
+
+                sm:grid-cols-3
+              "
+            >
               <CheckboxOption
                 checked={preferences.newJobs}
                 label="New job opportunities"
@@ -279,7 +409,7 @@ export default function JobAlertPreferences({
               <CheckboxOption
                 checked={preferences.specialAnnouncements}
                 label="Special announcements"
-                description="Receive important D•C Jobs updates and announcements."
+                description="Receive important D•C Jobs updates."
                 onChange={() =>
                   setPreferences((current) => ({
                     ...current,
@@ -288,17 +418,52 @@ export default function JobAlertPreferences({
                   }))
                 }
               />
+
+              <CheckboxOption
+                checked={preferences.careerReminders}
+                label="Career reminders"
+                description="Occasional reminders when you haven't checked new opportunities for a while."
+                onChange={() =>
+                  setPreferences((current) => ({
+                    ...current,
+
+                    careerReminders: !current.careerReminders,
+                  }))
+                }
+              />
             </div>
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-gray-950">Work preference</h3>
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-gray-950
+              "
+            >
+              Work preference
+            </h3>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+              "
+            >
               Leave all unchecked to mean any work mode.
             </p>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div
+              className="
+                mt-3
+                grid
+                gap-3
+
+                sm:grid-cols-3
+              "
+            >
               {[
                 ["remote", "Remote"],
 
@@ -327,13 +492,35 @@ export default function JobAlertPreferences({
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-gray-950">Employment type</h3>
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-gray-950
+              "
+            >
+              Employment type
+            </h3>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+              "
+            >
               Leave all unchecked to mean any employment type.
             </p>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div
+              className="
+                mt-3
+                grid
+                gap-3
+
+                sm:grid-cols-3
+              "
+            >
               {[
                 ["full", "Full-time"],
 
@@ -362,15 +549,44 @@ export default function JobAlertPreferences({
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-gray-950">Locations</h3>
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-gray-950
+              "
+            >
+              Locations
+            </h3>
 
-            <p className="mt-1 text-xs leading-5 text-gray-500">
+            <p
+              className="
+                mt-1
+                text-xs
+                leading-5
+                text-gray-500
+              "
+            >
               Separate multiple values with commas. Leave blank to accept any.
             </p>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div
+              className="
+                mt-4
+                grid
+                gap-4
+
+                sm:grid-cols-3
+              "
+            >
               <label>
-                <span className="text-xs font-semibold text-gray-700">
+                <span
+                  className="
+                    text-xs
+                    font-semibold
+                    text-gray-700
+                  "
+                >
                   Countries
                 </span>
 
@@ -378,12 +594,31 @@ export default function JobAlertPreferences({
                   value={countries}
                   onChange={(event) => setCountries(event.target.value)}
                   placeholder="Nigeria"
-                  className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#077998]"
+                  className="
+                    mt-1.5
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-white
+                    px-3
+                    py-2.5
+                    text-sm
+                    outline-none
+
+                    focus:border-[#077998]
+                  "
                 />
               </label>
 
               <label>
-                <span className="text-xs font-semibold text-gray-700">
+                <span
+                  className="
+                    text-xs
+                    font-semibold
+                    text-gray-700
+                  "
+                >
                   States
                 </span>
 
@@ -391,12 +626,31 @@ export default function JobAlertPreferences({
                   value={states}
                   onChange={(event) => setStates(event.target.value)}
                   placeholder="Lagos, Ogun"
-                  className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#077998]"
+                  className="
+                    mt-1.5
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-white
+                    px-3
+                    py-2.5
+                    text-sm
+                    outline-none
+
+                    focus:border-[#077998]
+                  "
                 />
               </label>
 
               <label>
-                <span className="text-xs font-semibold text-gray-700">
+                <span
+                  className="
+                    text-xs
+                    font-semibold
+                    text-gray-700
+                  "
+                >
                   Cities
                 </span>
 
@@ -404,18 +658,43 @@ export default function JobAlertPreferences({
                   value={cities}
                   onChange={(event) => setCities(event.target.value)}
                   placeholder="Ikeja"
-                  className="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#077998]"
+                  className="
+                    mt-1.5
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-white
+                    px-3
+                    py-2.5
+                    text-sm
+                    outline-none
+
+                    focus:border-[#077998]
+                  "
                 />
               </label>
             </div>
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-gray-950">
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-gray-950
+              "
+            >
               Skills and keywords
             </h3>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+              "
+            >
               Example: React, Next.js, Python, Data, AI.
             </p>
 
@@ -423,14 +702,41 @@ export default function JobAlertPreferences({
               value={keywords}
               onChange={(event) => setKeywords(event.target.value)}
               placeholder="React, Next.js, Node.js"
-              className="mt-3 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#077998]"
+              className="
+                mt-3
+                w-full
+                rounded-xl
+                border
+                border-gray-200
+                bg-white
+                px-3
+                py-2.5
+                text-sm
+                outline-none
+
+                focus:border-[#077998]
+              "
             />
           </section>
 
           <section>
-            <h3 className="text-sm font-bold text-gray-950">Minimum salary</h3>
+            <h3
+              className="
+                text-sm
+                font-bold
+                text-gray-950
+              "
+            >
+              Minimum salary
+            </h3>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+              "
+            >
               Optional. Leave blank if salary should not affect future matching.
             </p>
 
@@ -440,26 +746,85 @@ export default function JobAlertPreferences({
               value={minSalary}
               onChange={(event) => setMinSalary(event.target.value)}
               placeholder="500000"
-              className="mt-3 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#077998] sm:max-w-xs"
+              className="
+                mt-3
+                w-full
+                rounded-xl
+                border
+                border-gray-200
+                bg-white
+                px-3
+                py-2.5
+                text-sm
+                outline-none
+
+                focus:border-[#077998]
+
+                sm:max-w-xs
+              "
             />
           </section>
 
           {error && (
             <p
               role="alert"
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="
+                rounded-xl
+                border
+                border-red-200
+                bg-red-50
+                px-4
+                py-3
+                text-sm
+                text-red-700
+              "
             >
               {error}
             </p>
           )}
         </div>
 
-        <footer className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-gray-200 bg-white/95 px-5 py-4 backdrop-blur sm:flex-row sm:justify-end sm:px-7">
+        <footer
+          className="
+            sticky
+            bottom-0
+            flex
+            flex-col-reverse
+            gap-3
+            border-t
+            border-gray-200
+            bg-white/95
+            px-5
+            py-4
+            backdrop-blur
+
+            sm:flex-row
+            sm:justify-end
+            sm:px-7
+          "
+        >
           <button
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+            className="
+              inline-flex
+              min-h-11
+              items-center
+              justify-center
+              rounded-xl
+              border
+              border-gray-300
+              bg-white
+              px-5
+              text-sm
+              font-semibold
+              text-gray-700
+
+              hover:bg-gray-50
+
+              disabled:opacity-60
+            "
           >
             Cancel
           </button>
@@ -468,7 +833,22 @@ export default function JobAlertPreferences({
             type="button"
             disabled={saving}
             onClick={savePreferences}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#077998] px-5 text-sm font-semibold text-white hover:bg-[#066982] disabled:opacity-60"
+            className="
+              inline-flex
+              min-h-11
+              items-center
+              justify-center
+              rounded-xl
+              bg-[#077998]
+              px-5
+              text-sm
+              font-semibold
+              text-white
+
+              hover:bg-[#066982]
+
+              disabled:opacity-60
+            "
           >
             {saving ? "Saving..." : "Save Preferences"}
           </button>

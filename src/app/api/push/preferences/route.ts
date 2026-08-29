@@ -1,7 +1,10 @@
-
 import {
     PushSubscriptionModel,
 } from "@/models/PushSubscription";
+
+import {
+    isAllowedAppOrigin,
+} from "@/lib/requestOrigin";
 
 import mongoose from "mongoose";
 
@@ -10,9 +13,6 @@ import {
     NextResponse,
 } from "next/server";
 
-import {
-    isAllowedAppOrigin,
-} from "@/lib/requestOrigin";
 
 const ALLOWED_WORK_MODES =
     new Set([
@@ -36,9 +36,6 @@ type PushPreferencesLeanDocument = {
 };
 
 
-
-
-
 function cleanStrings(
     value:
         unknown,
@@ -59,8 +56,7 @@ function cleanStrings(
         .filter(
             (
                 item,
-            ):
-                item is string =>
+            ): item is string =>
                 typeof item ===
                 "string",
         )
@@ -89,8 +85,7 @@ function normalizePreferences(
             "object" &&
             value !==
             null
-            ? value as
-            Record<
+            ? value as Record<
                 string,
                 unknown
             >
@@ -126,6 +121,15 @@ function normalizePreferences(
         specialAnnouncements:
             preferences
                 .specialAnnouncements !==
+            false,
+
+        /*
+         * Existing subscriptions without this
+         * field behave as enabled.
+         */
+        careerReminders:
+            preferences
+                .careerReminders !==
             false,
 
         workModes:
@@ -170,15 +174,6 @@ function normalizePreferences(
     };
 }
 
-
-/*
- * ========================================
- * LOAD PREFERENCES
- * ========================================
- *
- * POST is used so the Push endpoint is
- * not exposed inside a query string URL.
- */
 
 export async function POST(
     request:
@@ -305,12 +300,6 @@ export async function POST(
 }
 
 
-/*
- * ========================================
- * UPDATE PREFERENCES
- * ========================================
- */
-
 export async function PATCH(
     request:
         NextRequest,
@@ -366,29 +355,27 @@ export async function PATCH(
         const workModes =
             cleanStrings(
                 body.workModes,
-            )
-                .filter(
-                    (
+            ).filter(
+                (
+                    value,
+                ) =>
+                    ALLOWED_WORK_MODES.has(
                         value,
-                    ) =>
-                        ALLOWED_WORK_MODES.has(
-                            value,
-                        ),
-                );
+                    ),
+            );
 
 
         const jobTypes =
             cleanStrings(
                 body.jobTypes,
-            )
-                .filter(
-                    (
+            ).filter(
+                (
+                    value,
+                ) =>
+                    ALLOWED_JOB_TYPES.has(
                         value,
-                    ) =>
-                        ALLOWED_JOB_TYPES.has(
-                            value,
-                        ),
-                );
+                    ),
+            );
 
 
         const countries =
@@ -471,6 +458,10 @@ export async function PATCH(
 
                             "preferences.specialAnnouncements":
                                 body.specialAnnouncements !==
+                                false,
+
+                            "preferences.careerReminders":
+                                body.careerReminders !==
                                 false,
 
                             "preferences.workModes":
