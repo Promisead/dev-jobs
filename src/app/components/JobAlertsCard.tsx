@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { trackEvent } from "@/lib/analytics";
 
+import { readConsent, setNotificationPreference } from "@/lib/consent";
+
 import JobAlertPreferences, {
   AlertPreferences,
   DEFAULT_ALERT_PREFERENCES,
@@ -115,6 +117,9 @@ export default function JobAlertsCard() {
       }
 
       if (Notification.permission === "denied") {
+        if (readConsent()) {
+          setNotificationPreference("disabled");
+        }
         setState("denied");
 
         return;
@@ -127,6 +132,11 @@ export default function JobAlertsCard() {
 
         if (!subscription) {
           setEndpoint(null);
+          const consent = readConsent();
+
+          if (consent && consent.notifications === "enabled") {
+            setNotificationPreference("pending");
+          }
 
           setState("ready");
 
@@ -141,6 +151,9 @@ export default function JobAlertsCard() {
          * are enabled.
          */
         await syncSubscriptionWithServer(subscription);
+        if (readConsent()) {
+          setNotificationPreference("enabled");
+        }
 
         setEndpoint(subscription.endpoint);
 
@@ -214,6 +227,9 @@ export default function JobAlertsCard() {
       setEndpoint(subscription.endpoint);
 
       setState("subscribed");
+      if (readConsent()) {
+        setNotificationPreference("enabled");
+      }
 
       setMessage("Job alerts are enabled on this device.");
 
@@ -286,6 +302,9 @@ export default function JobAlertsCard() {
       setPreferencesOpen(false);
 
       setState("ready");
+      if (readConsent()) {
+        setNotificationPreference("disabled");
+      }
 
       setMessage("Job alerts have been turned off.");
 
@@ -390,7 +409,10 @@ export default function JobAlertsCard() {
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-4 pb-3 pt-5 sm:px-6 lg:px-8">
+      <section
+        id="job-alerts"
+        className="mx-auto max-w-7xl px-4 pb-3 pt-5 sm:px-6 lg:px-8"
+      >
         <div className="overflow-hidden rounded-2xl border border-[#077998]/15 bg-gradient-to-r from-[#f5fbfc] to-white shadow-sm">
           <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <div className="flex items-start gap-4">
@@ -434,9 +456,11 @@ export default function JobAlertsCard() {
                   )}
 
                   {state === "denied" && (
-                    <p className="text-xs text-amber-700">
-                      Notifications are blocked. Enable them in your browser or
-                      device settings.
+                    <p className="max-w-xl text-xs leading-5 text-amber-700">
+                      Notifications are unavailable in this browsing session. If
+                      you&apos;re using private or Incognito browsing, open D•C
+                      Jobs in a normal browser window. Otherwise, allow
+                      notifications from your browser&apos;s site settings.
                     </p>
                   )}
 
@@ -474,15 +498,26 @@ export default function JobAlertsCard() {
                     {busy ? "Please wait..." : "Turn Off"}
                   </button>
                 </>
+              ) : state === "denied" ? (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-gray-200 px-5 text-sm font-semibold text-gray-500"
+                >
+                  Notifications unavailable
+                </button>
+              ) : state === "install-required" ? (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-gray-200 px-5 text-sm font-semibold text-gray-500"
+                >
+                  Install App First
+                </button>
               ) : (
                 <button
                   type="button"
-                  disabled={
-                    busy ||
-                    state === "loading" ||
-                    state === "denied" ||
-                    state === "install-required"
-                  }
+                  disabled={busy || state === "loading"}
                   onClick={enableAlerts}
                   className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#077998] px-5 text-sm font-semibold text-white transition hover:bg-[#066982] disabled:cursor-not-allowed disabled:opacity-60"
                 >
