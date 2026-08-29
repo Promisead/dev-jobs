@@ -124,7 +124,8 @@ export function normalizePushPreferences(
         /*
          * Only explicit false disables.
          *
-         * undefined/missing therefore remains ON.
+         * Missing values stay enabled so older
+         * subscriptions remain backwards compatible.
          */
         newJobs:
             preferences
@@ -134,6 +135,16 @@ export function normalizePushPreferences(
         specialAnnouncements:
             preferences
                 .specialAnnouncements !==
+            false,
+
+        /*
+         * Existing subscriptions were created before
+         * career reminders existed, so a missing value
+         * should behave as enabled.
+         */
+        careerReminders:
+            preferences
+                .careerReminders !==
             false,
 
         workModes:
@@ -501,4 +512,26 @@ export function wantsSpecialAnnouncements(
         rawPreferences,
     )
         .specialAnnouncements;
+}
+
+/*
+ * ========================================
+ * CAREER REMINDER OPT-IN
+ * ========================================
+ *
+ * Used by the win-back notification flow.
+ *
+ * Legacy subscriptions without the property
+ * are treated as opted in because
+ * normalizePushPreferences() defaults it to true.
+ */
+
+export function wantsCareerReminders(
+    rawPreferences:
+        unknown,
+) {
+    return normalizePushPreferences(
+        rawPreferences,
+    )
+        .careerReminders;
 }
