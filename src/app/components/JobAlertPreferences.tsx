@@ -281,16 +281,17 @@ export default function JobAlertPreferences({
         aria-modal="true"
         aria-labelledby="job-alert-preferences-title"
         className="
-          max-h-[92dvh]
-          w-full
-          overflow-y-auto
-          rounded-t-3xl
-          bg-[#fafafa]
-          shadow-2xl
+    job-alert-scrollbar
+    max-h-[92dvh]
+    w-full
+    overflow-y-auto
+    rounded-t-3xl
+    bg-[#fafafa]
+    shadow-2xl
 
-          sm:max-w-2xl
-          sm:rounded-3xl
-        "
+    sm:max-w-2xl
+    sm:rounded-3xl
+  "
         onMouseDown={(event) => {
           event.stopPropagation();
         }}

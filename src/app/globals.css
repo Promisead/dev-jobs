@@ -317,3 +317,64 @@ option {
     margin-left: 2rem;
   }
 }
+
+/* ========================================
+   D•C JOBS GLOBAL SCROLLBAR
+======================================== */
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #077998 #eef8fa;
+}
+
+/* Chrome, Edge, Safari */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: #eef8fa;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #077998;
+  border-radius: 999px;
+  border: 1px solid #eef8fa;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: #066982;
+}
+
+/* ========================================
+   D•C JOB ALERT MODAL SCROLLBAR
+======================================== */
+
+.job-alert-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #077998 #eef8fa;
+}
+
+.job-alert-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.job-alert-scrollbar::-webkit-scrollbar-track {
+  background: #eef8fa;
+  border-radius: 999px;
+}
+
+.job-alert-scrollbar::-webkit-scrollbar-thumb {
+  background: #077998;
+  border-radius: 999px;
+  border: 1px solid #eef8fa;
+}
+
+.job-alert-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #066982;
+}
