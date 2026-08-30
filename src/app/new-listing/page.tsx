@@ -161,7 +161,9 @@ export default async function NewListingPage() {
    */
 
   if (!approved) {
-    return <PostingAccessNotice userEmail={user.email} />;
+    const userName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+
+    return <PostingAccessNotice userEmail={user.email} userName={userName} />;
   }
 
   /*
