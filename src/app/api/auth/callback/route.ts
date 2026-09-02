@@ -1,5 +1,7 @@
 import { handleAuth } from '@workos-inc/authkit-nextjs';
 
-// Redirect the user to `/` after successful sign in
-// The redirect can be customized: `handleAuth({ returnPathname: '/foo' })`
-export const GET = handleAuth();
+// Redirect approved job posters to `/new-listing` after successful sign in
+// The actual approval check happens in the page itself
+export const GET = handleAuth({
+    returnPathname: '/new-listing',
+});
