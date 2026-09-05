@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build application
+        env:
+          WORKOS_COOKIE_PASSWORD: ci-placeholder-cookie-password-at-least-32-characters
+          WORKOS_CLIENT_ID: ci-placeholder-client-id
+          WORKOS_API_KEY: ci-placeholder-api-key
+          WORKOS_REDIRECT_URI: http://localhost:3000/api/auth/callback
+          NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/api/auth/callback
+        run: npm run build
