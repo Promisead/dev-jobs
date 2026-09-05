@@ -34,6 +34,9 @@ jobs:
 
       - name: Build application
         env:
+          WORKOS_COOKIE_PASSWORD: ci-placeholder-cookie-password-at-least-32-characters
           WORKOS_CLIENT_ID: ci-placeholder-client-id
           WORKOS_API_KEY: ci-placeholder-api-key
+          WORKOS_REDIRECT_URI: http://localhost:3000/api/auth/callback
+          NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3000/api/auth/callback
         run: npm run build
