@@ -33,4 +33,7 @@ jobs:
         run: npm run lint
 
       - name: Build application
+        env:
+          WORKOS_CLIENT_ID: ci-placeholder-client-id
+          WORKOS_API_KEY: ci-placeholder-api-key
         run: npm run build
