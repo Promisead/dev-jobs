@@ -248,8 +248,7 @@ export async function saveJobAction(
 
   if (
     !country ||
-    !state ||
-    !city
+    !state
   ) {
     throw new Error(
       "Complete job location is required."

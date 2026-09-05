@@ -579,10 +579,6 @@ export default function JobForm({
       newErrors.state = "State is required.";
     }
 
-    if (!cityName) {
-      newErrors.city = "City is required.";
-    }
-
     if (!data.get("contactName")) {
       newErrors.contactName = "Contact name is required.";
     }
@@ -838,10 +834,6 @@ export default function JobForm({
                 }}
                 placeHolder="Select City"
               />
-
-              {errors.city && (
-                <p className="mt-1 text-sm text-red-500">{errors.city}</p>
-              )}
             </div>
           </div>
         </div>
